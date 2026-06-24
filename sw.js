@@ -1,6 +1,6 @@
 // 診療ツール ホーム — Service Worker（オフラインキャッシュ）
 // バージョンを変えると古いキャッシュを破棄して更新します。
-const CACHE = 'shinryo-tools-v1';
+const CACHE = 'shinryo-tools-v202606241212';
 
 const ASSETS = [
   './',
