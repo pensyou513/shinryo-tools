@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年度（令和8年度）診療報酬 消化器内科 加算計算ツール</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --ink:#1a2433; --sub:#5b6b7d;
+    --accent:#0f6e5c; --accent2:#0b4f86; --line:#dde4ea;
+    --new:#c2410c; --hold:#64748b; --warn:#b45309;
+    --total-bg:#10303f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Yu Gothic UI","Hiragino Sans","Meiryo",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;padding-bottom:170px}
+  header{background:linear-gradient(135deg,#0b4f86,#0f6e5c);color:#fff;padding:18px 22px}
+  header h1{margin:0;font-size:19px}
+  header .meta{font-size:12px;opacity:.92;margin-top:6px;line-height:1.7}
+  .wrap{max-width:1080px;margin:0 auto;padding:14px}
+  .notice{background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.8;color:#7c2d12;margin-bottom:14px}
+  .tabs{display:flex;gap:8px;margin:6px 0 14px}
+  .tab{flex:1;padding:12px;text-align:center;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer;font-size:15px;font-weight:bold;color:var(--sub)}
+  .tab.active{border-color:var(--accent);color:var(--accent);background:#ecfdf5}
+  .tab small{display:block;font-weight:normal;font-size:11px;margin-top:2px}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden}
+  section.card h2{margin:0;padding:10px 14px;font-size:14px;background:#f0f4f7;border-bottom:1px solid var(--line);color:var(--accent2)}
+  section.card h2 .desc{font-weight:normal;font-size:11px;color:var(--sub);margin-left:8px}
+  .row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #eef2f5;flex-wrap:wrap}
+  .row:last-child{border-bottom:none}
+  .row label.name{flex:1;min-width:260px;cursor:pointer;line-height:1.5}
+  .row .code{color:var(--sub);font-size:11px;margin-right:6px}
+  .row .note{display:block;font-size:11px;color:var(--sub)}
+  .badge{display:inline-block;font-size:10px;padding:1px 7px;border-radius:9px;margin-left:6px;color:#fff;vertical-align:middle}
+  .b-new{background:var(--new)} .b-up{background:#0e7490} .b-hold{background:var(--hold)} .b-r6{background:var(--warn)}
+  input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+  input.cnt{width:54px;padding:4px;border:1px solid var(--line);border-radius:6px;text-align:center}
+  input.pts{width:84px;padding:4px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:bold;color:var(--accent2);background:#fbfdff}
+  .unit{font-size:11px;color:var(--sub)}
+  select{padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:13px;max-width:100%}
+  .totalbar{position:fixed;left:0;right:0;bottom:0;background:var(--total-bg);color:#fff;box-shadow:0 -4px 14px rgba(0,0,0,.25)}
+  .totalbar .inner{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+  .totalbar .big{font-size:26px;font-weight:bold}
+  .totalbar .lbl{font-size:11px;opacity:.8;display:block}
+  .totalbar select{color:var(--ink)}
+  .totalbar button{background:#fff;color:var(--total-bg);border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer}
+  .hidden{display:none}
+  .subtotal{font-size:12px;color:var(--sub);padding:6px 14px;text-align:right;background:#fafcfd}
+  .legend{font-size:11px;color:var(--sub);margin:8px 0 14px;line-height:2}
+  @media print{.totalbar{position:static}body{padding-bottom:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>消化器内科 加算計算ツール（2026年度・令和8年度 診療報酬改定対応）</h1>
+  <div class="meta">
+    本体改定率 +3.09%（30年ぶり3%台）／薬価 −0.87%　|　本体施行：<b>2026年（令和8年）6月1日</b>　|　1点 = 10円　|　専門医・指導医向け
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="notice">
+    ⚠ <b>使用上の注意</b>：本ツールは2026年2月答申〜3月告示の二次情報源に基づく試算用です。
+    <span class="badge b-new">新設</span><span class="badge b-up">増点</span><span class="badge b-hold">据置</span> は2026年改定で確認済みの項目、
+    <span class="badge b-r6">R6/要確認</span> は令和6年度点数を引き継いだ項目（2026年告示原文での確認推奨）です。
+    <b>全ての点数欄は手入力で修正可能</b>です。実際の算定は厚労省告示・通知・疑義解釈の原文に従ってください。施設基準・併算定制限の確認は各医療機関の責任で行ってください。
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-kinmu" onclick="setMode('kinmu')">🏥 勤務医（病院）<small>内視鏡・ERCP・IVR・鎮静・病理を具体的に</small></div>
+    <div class="tab" id="tab-kaigyo" onclick="setMode('kaigyo')">🩺 開業医（クリニック）<small>基本診療料・管理料 ＋ 上部・下部内視鏡・腹部エコー</small></div>
+  </div>
+
+  <div class="legend" id="mode-desc"></div>
+
+  <!-- ============ 開業医：基本診療料 ============ -->
+  <section class="card mode-kaigyo" id="sec-basic">
+    <h2>① 基本診療料・外来加算 <span class="desc">2026年改定の変更が最も集中した領域</span></h2>
+    <div id="list-basic"></div>
+  </section>
+
+  <!-- ============ 開業医：管理料 ============ -->
+  <section class="card mode-kaigyo" id="sec-kanri">
+    <h2>② 医学管理料 <span class="desc">消化器内科の外来でよく算定するもの</span></h2>
+    <div id="list-kanri"></div>
+  </section>
+
+  <!-- ============ 共通：検査 ============ -->
+  <section class="card mode-both" id="sec-kensa">
+    <h2>③ 検査：内視鏡・腹部エコー（D） <span class="desc">回数 × 点数で計算</span></h2>
+    <div id="list-kensa"></div>
+    <div class="row">
+      <label class="name"><b>緊急内視鏡の通則加算</b>（外来・入院外、所定点数に対する割増）<span class="note">検査小計（注加算含む簡易計算）に適用されます。正確には各所定点数単位で適用。</span></label>
+      <select id="kensa-kinkyu" onchange="calc()">
+        <option value="0">なし</option>
+        <option value="0.4">時間外 +40%</option>
+        <option value="0.8">休日 +80%</option>
+        <option value="0.8d">深夜 +80%</option>
+      </select>
+    </div>
+    <div class="subtotal" id="sub-kensa"></div>
+  </section>
+
+  <!-- ============ 共通：消化管内視鏡治療 ============ -->
+  <section class="card mode-both" id="sec-shujutsu">
+    <h2>④ 消化管内視鏡治療（K） <span class="desc">上部・下部の切除・止血</span></h2>
+    <div id="list-shujutsu"></div>
+  </section>
+
+  <!-- ============ 勤務医：胆膵内視鏡 ============ -->
+  <section class="card mode-kinmu" id="sec-tansui">
+    <h2>⑤ 胆膵内視鏡：ERCP関連（K・D） <span class="desc">EST・EPLBD・砕石・ドレナージ・ステント</span></h2>
+    <div id="list-tansui"></div>
+  </section>
+
+  <!-- ============ 勤務医：肝・アンギオ ============ -->
+  <section class="card mode-kinmu" id="sec-ivr">
+    <h2>⑥ 肝臓・アンギオ（IVR） <span class="desc">肝生検・RFA・TACE・BRTO・塞栓止血</span></h2>
+    <div id="list-ivr"></div>
+    <div class="row">
+      <label class="name"><b>手術（K）の時間外等加算</b>（通則：所定点数に対する割増）<span class="note">④⑤⑥のK手技小計に適用（簡易計算）。時間外等加算1の届出施設は割増率が2倍（時間外+80%／休日・深夜+160%）。</span></label>
+      <select id="ope-kinkyu" onchange="calc()">
+        <option value="0">なし</option>
+        <option value="0.4">時間外 +40%</option>
+        <option value="0.8">休日 +80%</option>
+        <option value="0.8d">深夜 +80%</option>
+        <option value="0.8e">【加算1届出】時間外 +80%</option>
+        <option value="1.6">【加算1届出】休日 +160%</option>
+        <option value="1.6d">【加算1届出】深夜 +160%</option>
+      </select>
+    </div>
+    <div class="subtotal" id="sub-shujutsu"></div>
+  </section>
+
+  <!-- ============ 共通：鎮静・麻酔 ============ -->
+  <section class="card mode-both" id="sec-masui">
+    <h2>⑦ 鎮静・麻酔（L）　<span class="badge b-new">2026 全面再編</span> <span class="desc">麻酔の深度×気道確保×管理体制の3軸で再構築</span></h2>
+    <div id="list-masui"></div>
+  </section>
+
+  <!-- ============ 共通：病理 ============ -->
+  <section class="card mode-both" id="sec-byori">
+    <h2>⑧ 病理（N） <span class="desc">生検時に併せて算定</span></h2>
+    <div id="list-byori"></div>
+  </section>
+</div>
+
+<div class="totalbar">
+  <div class="inner">
+    <div><span class="lbl">合計点数</span><span class="big" id="t-pts">0</span> 点</div>
+    <div><span class="lbl">保険請求額（×10円）</span><span class="big" id="t-yen">0</span> 円</div>
+    <div>
+      <span class="lbl">患者負担割合</span>
+      <select id="futan" onchange="calc()">
+        <option value="0.3">3割</option>
+        <option value="0.2">2割</option>
+        <option value="0.1">1割</option>
+      </select>
+    </div>
+    <div><span class="lbl">窓口負担（10円未満四捨五入）</span><span class="big" id="t-mado">0</span> 円</div>
+    <div style="margin-left:auto"><button onclick="resetAll()">リセット</button></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 点数マスタ（2026年6月1日施行ベース）
+// tag: new=2026新設 / up=2026増点 / hold=2026据置(確認済) / r6=R6点数引き継ぎ(告示要確認)
+// scope: "kinmu" = 勤務医モードのみ表示・計上（省略時は両モード共通）
+// k: true = 手術(K)の時間外等加算の対象に含める
+// ============================================================
+const DATA = {
+basic: [
+ {code:"A000", name:"初診料", pts:291, tag:"hold", note:"2026年改定で据え置き"},
+ {code:"A001", name:"再診料", pts:76, tag:"up", note:"75点 → 76点（+1点）。電話等再診も76点"},
+ {code:"A001注8", name:"外来管理加算", pts:52, tag:"r6", note:"内視鏡検査・処置等を行った日は算定不可"},
+ {code:"新設", name:"外来・在宅物価対応料（初診・再診時）", pts:2, tag:"new", note:"物価高騰対応で新設。令和9年6月以降は4点に倍増予定。訪問診療時は3点"},
+ {code:"新設", name:"外来・在宅ベースアップ評価料(Ⅰ) 初診時", pts:17, tag:"up", note:"6点 → 17点。さらに賃上げ継続機関は23点（点数欄を修正）"},
+ {code:"新設", name:"外来・在宅ベースアップ評価料(Ⅰ) 再診時等", pts:4, tag:"up", note:"2点 → 4点。賃上げ継続機関は6点"},
+ {code:"A000注10", name:"機能強化加算（初診時）", pts:80, tag:"r6", note:"かかりつけ医機能の施設基準届出"},
+ {code:"新設", name:"電子的診療情報連携体制整備加算（初診時）", pts:15, tag:"new", note:"医療DX推進体制整備加算＋医療情報取得加算を統合。体制により15点／9点／4点の3区分（点数欄を修正）"},
+ {code:"新設", name:"電子的診療情報連携体制整備加算（再診時・月1回）", pts:2, tag:"new", note:"明細書発行体制等加算とは併算定不可"},
+ {code:"A001注6", name:"明細書発行体制等加算", pts:1, tag:"r6", note:"電子的診療情報連携体制整備加算と併算定不可"},
+ {code:"A001注9", name:"時間外対応体制加算（旧:時間外対応加算）", pts:7, tag:"up", note:"名称変更＋増点：旧1〜5点 → 新2〜7点（区分により。点数欄を修正）月1回"},
+ {code:"通則", name:"初診 時間外加算", pts:85, tag:"r6", note:"休日250点／深夜480点（点数欄を修正して使用）"},
+ {code:"通則", name:"再診 時間外加算", pts:65, tag:"r6", note:"休日190点／深夜420点（点数欄を修正して使用）"},
+],
+kanri: [
+ {code:"B000", name:"特定疾患療養管理料（診療所・月2回まで）", pts:225, tag:"r6", note:"⚠2026改定：NSAIDs投与中の消化性潰瘍が算定対象から除外", cnt:true},
+ {code:"B001-3", name:"生活習慣病管理料(Ⅰ) 脂質異常症", pts:610, tag:"hold", note:"基本点数据え置き。⚠2026：血液検査を6か月に1回以上が要件化／療養計画書の患者署名は不要化"},
+ {code:"B001-3", name:"生活習慣病管理料(Ⅰ) 高血圧症", pts:660, tag:"hold", note:"同上"},
+ {code:"B001-3", name:"生活習慣病管理料(Ⅰ) 糖尿病", pts:760, tag:"hold", note:"同上"},
+ {code:"B001-3-3", name:"生活習慣病管理料(Ⅱ)", pts:333, tag:"hold", note:"⚠2026：包括範囲を大幅縮小（別途算定可能な管理料が拡大）"},
+ {code:"新設", name:"充実管理加算1（旧:外来データ提出加算）", pts:30, tag:"new", note:"体制＋十分な実績(上位20%)30点／相当の実績(中位30%)20点／体制のみ10点（点数欄を修正）"},
+ {code:"新設", name:"眼科医療機関連携強化加算", pts:60, tag:"new", note:"生活習慣病管理料の加算（糖尿病眼合併症連携）"},
+ {code:"新設", name:"歯科医療機関連携強化加算", pts:60, tag:"new", note:"生活習慣病管理料の加算"},
+ {code:"A001注12", name:"地域包括診療加算1（慢性疾患等）", pts:21, tag:"hold", note:"加算2は28点。認知症地域包括診療加算は31点／38点（据え置き）"},
+ {code:"F100注5", name:"特定疾患処方管理加算（処方料/処方箋料・28日以上）", pts:56, tag:"r6", note:"月1回"},
+ {code:"B001-3他", name:"悪性腫瘍特異物質治療管理料（腫瘍マーカー1項目）", pts:360, tag:"r6", note:"2項目以上は400点（点数欄を修正）"},
+],
+kensa: [
+ {code:"D306", name:"食道ファイバースコピー", pts:800, tag:"r6", cnt:true},
+ {code:"D308", name:"胃・十二指腸ファイバースコピー（EGD）", pts:1140, tag:"r6", cnt:true},
+ {code:"D310", name:"小腸内視鏡検査（バルーン式）", pts:6800, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"D310", name:"小腸内視鏡検査（カプセル型）", pts:1700, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"D312", name:"直腸ファイバースコピー", pts:550, tag:"r6", cnt:true},
+ {code:"D313", name:"大腸内視鏡検査（〜S状結腸）", pts:900, tag:"r6", cnt:true},
+ {code:"D313", name:"大腸内視鏡検査（〜下行・横行結腸）", pts:1350, tag:"r6", cnt:true},
+ {code:"D313", name:"大腸内視鏡検査（〜上行・盲腸 全大腸）", pts:1550, tag:"r6", cnt:true},
+ {code:"D313", name:"大腸カプセル内視鏡", pts:1550, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"注加算", name:"粘膜点墨法加算", pts:60, tag:"r6", cnt:true},
+ {code:"注加算", name:"狭帯域光強調加算（NBI等・悪性腫瘍疑い）", pts:200, tag:"r6", cnt:true},
+ {code:"注加算", name:"超音波内視鏡検査加算（EUS）", pts:300, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"D313注", name:"バルーン内視鏡加算", pts:450, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"D414", name:"内視鏡下生検法（1臓器につき）", pts:310, tag:"r6", cnt:true},
+ {code:"D215", name:"腹部超音波（断層撮影法・胸腹部）", pts:530, tag:"r6", cnt:true, note:"レセプト摘要欄に対象領域の記載が必要"},
+ {code:"D215注", name:"　└ パルスドプラ法加算", pts:150, tag:"r6", cnt:true},
+ {code:"D215注", name:"　└ 造影剤使用加算（造影エコー）", pts:180, tag:"r6", cnt:true, scope:"kinmu"},
+],
+shujutsu: [
+ {code:"K526-2", name:"内視鏡的食道粘膜切除術 1 EMR", pts:8480, tag:"r6", cnt:true, k:true},
+ {code:"K526-2", name:"内視鏡的食道粘膜切除術 2 ESD（粘膜下層剥離術）", pts:22100, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K653", name:"内視鏡的胃十二指腸ポリープ・粘膜切除術（早期悪性腫瘍 EMR）", pts:6460, tag:"r6", cnt:true, k:true},
+ {code:"K653", name:"内視鏡的胃十二指腸 ESD（早期悪性腫瘍粘膜下層剥離術）", pts:18370, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K721", name:"内視鏡的大腸ポリープ・粘膜切除術（長径2cm未満）", pts:5000, tag:"r6", cnt:true, k:true, note:"外来手技料。⚠2026：短期滞在手術等基本料3（入院パッケージ）は12,113→12,580点に増点との報あり、入院例は短手3で算定"},
+ {code:"K721", name:"内視鏡的大腸ポリープ・粘膜切除術（長径2cm以上）", pts:7000, tag:"r6", cnt:true, k:true, note:"短手3は16,153→16,365点との報あり"},
+ {code:"K721-4", name:"早期悪性腫瘍大腸粘膜下層剥離術（大腸ESD）", pts:22040, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K654", name:"内視鏡的消化管止血術", pts:4600, tag:"r6", cnt:true, k:true},
+ {code:"K533", name:"食道・胃静脈瘤硬化療法（EIS・内視鏡）", pts:8990, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K533-2", name:"内視鏡的食道・胃静脈瘤結紮術（EVL）", pts:8780, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K664", name:"胃瘻造設術（PEG・経皮内視鏡下）", pts:6070, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+],
+tansui: [
+ {code:"D308注1", name:"ERCP：胆管・膵管造影法加算", pts:600, tag:"r6", cnt:true, scope:"kinmu", note:"D308本体1,140点（③でチェック）に上乗せして算定。造影剤注入手技料・ファイルム代は別"},
+ {code:"K687", name:"内視鏡的乳頭切開術（EST）", pts:11270, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K686", name:"内視鏡的胆道拡張術（EPBD／EPLBD：乳頭バルーン拡張）", pts:13820, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"EPLBDの算定区分は施設・審査により異なる場合あり（要確認）"},
+ {code:"K685", name:"内視鏡的胆道結石除去術 1（胆道砕石術を伴うもの）", pts:14300, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"機械的砕石（EML）等を伴う採石"},
+ {code:"K685", name:"内視鏡的胆道結石除去術 2（その他：バスケット・バルーン採石）", pts:9980, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K685/686注", name:"　└ バルーン内視鏡加算（術後再建腸管に対する実施）", pts:3500, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"K688", name:"内視鏡的胆道ステント留置術（EBS／EBD）", pts:11540, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K682-3", name:"内視鏡的経鼻胆管ドレナージ術（ENBD）", pts:10800, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"初回実施のみ。2回目以降のドレナージはJ002ドレーン法で算定"},
+ {code:"K708-3", name:"内視鏡的膵管ステント留置術", pts:22240, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"D414-2", name:"超音波内視鏡下穿刺吸引生検法（EUS-FNA）", pts:4800, tag:"r6", cnt:true, scope:"kinmu"},
+],
+ivr: [
+ {code:"D412", name:"経皮的針生検法（肝生検）", pts:1600, tag:"r6", cnt:true, scope:"kinmu", note:"透視・心電図・超音波検査の費用を含む（別途算定不可）"},
+ {code:"K697-3", name:"肝悪性腫瘍ラジオ波焼灼療法（RFA）2cm以内・経皮等", pts:15000, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"2cmは焼灼範囲ではなく腫瘍長径"},
+ {code:"K697-3", name:"肝RFA 2cm以内・腹腔鏡によるもの", pts:16300, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K697-3", name:"肝RFA 2cm超・経皮等", pts:21960, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K697-3", name:"肝RFA 2cm超・腹腔鏡によるもの", pts:23260, tag:"r6", cnt:true, k:true, scope:"kinmu"},
+ {code:"K697-3注", name:"　└ フュージョンイメージング加算", pts:200, tag:"r6", cnt:true, scope:"kinmu"},
+ {code:"K615 1", name:"血管塞栓術：止血術（動脈性消化管出血のTAE等）", pts:26570, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"手術に伴う画像診断・検査の費用は算定しない"},
+ {code:"K615 2", name:"血管塞栓術：選択的動脈化学塞栓術（TACE）", pts:20040, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"肝細胞癌に対し区域枝より末梢側で実施した場合"},
+ {code:"K615 4", name:"血管塞栓術：その他（BRTO等）", pts:20480, tag:"r6", cnt:true, k:true, scope:"kinmu", note:"BRTO（バルーン下逆行性経静脈的塞栓術）は一般に本区分で算定（審査要確認）。門脈塞栓術（開腹）は27,140点"},
+],
+masui: [
+ {code:"新L001", name:"吸入麻酔又は静脈麻酔による鎮静（10分未満）", pts:120, tag:"new", note:"旧:迷もう麻酔・短時間静脈麻酔・開放点滴式全麻(旧L007)を統合再編", cnt:true},
+ {code:"新L001", name:"吸入麻酔又は静脈麻酔による鎮静（10分以上20分未満）", pts:310, tag:"new", note:"内視鏡検査時の鎮静評価が明確化", cnt:true},
+ {code:"深鎮静", name:"深鎮静 区分1（麻酔科医が専従で実施）", pts:2600, tag:"new", note:"2時間超は30分ごと管理時間加算780点", cnt:true, scope:"kinmu"},
+ {code:"深鎮静", name:"深鎮静 区分2（麻酔科医の指導下で専従実施）", pts:1700, tag:"new", cnt:true, scope:"kinmu"},
+ {code:"深鎮静", name:"深鎮静 区分3（専従で実施）", pts:900, tag:"new", cnt:true, scope:"kinmu"},
+ {code:"深鎮静", name:"深鎮静 区分4（その他）", pts:600, tag:"new", cnt:true, scope:"kinmu"},
+],
+byori: [
+ {code:"N000", name:"病理組織標本作製（1臓器につき）", pts:860, tag:"r6", cnt:true},
+ {code:"N006", name:"病理診断料（組織診断料）", pts:520, tag:"r6", note:"病理診断科標榜・病理医配置の場合"},
+ {code:"N007", name:"病理判断料（月1回）", pts:130, tag:"r6", note:"病理診断料を算定しない場合"},
+],
+};
+const TAGLBL = {new:["新設","b-new"], up:["増点","b-up"], hold:["据置","b-hold"], r6:["R6/要確認","b-r6"]};
+
+function render(){
+ for(const key of Object.keys(DATA)){
+  const host = document.getElementById("list-"+key);
+  if(!host) continue;
+  host.innerHTML = DATA[key].map((it,i)=>{
+   const id = key+"-"+i;
+   const [lbl,cls] = TAGLBL[it.tag];
+   return `<div class="row${it.scope==="kinmu"?" row-kinmu":""}">
+    <input type="checkbox" id="${id}" onchange="calc()">
+    <label class="name" for="${id}"><span class="code">${it.code}</span>${it.name}
+      <span class="badge ${cls}">${lbl}</span>
+      ${it.note?`<span class="note">${it.note}</span>`:""}
+    </label>
+    ${it.cnt?`<input class="cnt" type="number" id="${id}-n" value="1" min="1" onchange="calc()"><span class="unit">回/個</span>`:""}
+    <input class="pts" type="number" id="${id}-p" value="${it.pts}" onchange="calc()"><span class="unit">点</span>
+   </div>`;
+  }).join("");
+ }
+}
+
+// セクション合計。filter: 任意の絞り込み関数（itemを受ける）
+function secTotal(key, filter){
+ const mode = document.body.dataset.mode || "kinmu";
+ let t = 0;
+ DATA[key].forEach((it,i)=>{
+  if(mode==="kaigyo" && it.scope==="kinmu") return;   // 開業医モードでは勤務医専用項目を計上しない
+  if(filter && !filter(it)) return;
+  const id = key+"-"+i;
+  if(document.getElementById(id).checked){
+   const n = it.cnt ? (parseInt(document.getElementById(id+"-n").value)||1) : 1;
+   const p = parseInt(document.getElementById(id+"-p").value)||0;
+   t += n*p;
+  }
+ });
+ return t;
+}
+
+function calc(){
+ const mode = document.body.dataset.mode || "kinmu";
+ let total = 0;
+ if(mode==="kaigyo"){ total += secTotal("basic") + secTotal("kanri"); }
+
+ // ③ 検査 ＋ 緊急内視鏡加算
+ const kensa = secTotal("kensa");
+ const kRate = parseFloat(document.getElementById("kensa-kinkyu").value)||0;
+ const kAdd = Math.round(kensa * kRate);
+ document.getElementById("sub-kensa").textContent =
+   `検査小計 ${kensa.toLocaleString()}点` + (kAdd?` ＋ 緊急加算 ${kAdd.toLocaleString()}点 ＝ ${(kensa+kAdd).toLocaleString()}点`:"");
+ total += kensa + kAdd;
+
+ // ④⑤⑥ 手技。時間外等加算はK手技（k:true）のみに適用
+ const opeAll = secTotal("shujutsu") + secTotal("tansui") + secTotal("ivr");
+ const opeK   = secTotal("shujutsu", it=>it.k) + secTotal("tansui", it=>it.k) + secTotal("ivr", it=>it.k);
+ const oRate = parseFloat(document.getElementById("ope-kinkyu").value)||0;
+ const oAdd = Math.round(opeK * oRate);
+ document.getElementById("sub-shujutsu").textContent =
+   `手技小計（④＋⑤＋⑥）${opeAll.toLocaleString()}点` + (oAdd?` ＋ 時間外等加算（K手技 ${opeK.toLocaleString()}点に適用）${oAdd.toLocaleString()}点 ＝ ${(opeAll+oAdd).toLocaleString()}点`:"");
+ total += opeAll + oAdd;
+
+ total += secTotal("masui") + secTotal("byori");
+
+ const yen = total*10;
+ const futan = parseFloat(document.getElementById("futan").value);
+ const mado = Math.round(yen*futan/10)*10;
+ document.getElementById("t-pts").textContent = total.toLocaleString();
+ document.getElementById("t-yen").textContent = yen.toLocaleString();
+ document.getElementById("t-mado").textContent = mado.toLocaleString();
+}
+
+function setMode(m){
+ document.body.dataset.mode = m;
+ document.getElementById("tab-kinmu").classList.toggle("active", m==="kinmu");
+ document.getElementById("tab-kaigyo").classList.toggle("active", m==="kaigyo");
+ document.querySelectorAll(".mode-kaigyo").forEach(el=>el.classList.toggle("hidden", m!=="kaigyo"));
+ document.querySelectorAll(".mode-kinmu").forEach(el=>el.classList.toggle("hidden", m!=="kinmu"));
+ document.querySelectorAll(".row-kinmu").forEach(el=>el.classList.toggle("hidden", m==="kaigyo"));
+ document.getElementById("mode-desc").innerHTML = m==="kinmu"
+  ? "🏥 <b>勤務医モード</b>：消化管内視鏡に加え、ERCP関連（EST・EPLBD・砕石・ステント）、肝生検・RFA・TACE・BRTO等のIVR、緊急・時間外加算、鎮静、病理まで試算します。基本診療料（外来診療料等）は病院の入院・外来区分により別途。"
+  : "🩺 <b>開業医モード</b>：基本診療料（2026年改定の変更点込み）＋管理料＋上部・下部消化管内視鏡（EMR・ポリペク・止血）＋腹部超音波検査を試算します。";
+ calc();
+}
+
+function resetAll(){
+ document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+ document.querySelectorAll('input.cnt').forEach(c=>c.value=1);
+ render(); // 点数もマスタ値に戻す
+ calc();
+}
+
+render();
+setMode('kinmu');
+</script>
+</body>
+</html>

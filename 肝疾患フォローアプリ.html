@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>肝疾患フォローアプリ（脂肪肝・B/C肝炎）</title>
+<style>
+  :root{
+    --bg:#f4f7f8; --card:#ffffff; --ink:#1a2433; --sub:#5b6b7d;
+    --teal:#0d7e8f; --blue:#1f7fc4; --green:#1aa86b; --orange:#e8923a; --red:#c44;
+    --line:#d9e0e3;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:12px;line-height:1.5}
+  header{background:linear-gradient(135deg,var(--teal),#0b5a66);color:#fff;padding:12px 18px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:16px}
+  header .meta{font-size:11px;opacity:.9}
+  header .pt{display:flex;gap:8px;align-items:center}
+  header select,header button,header input{font-family:inherit;font-size:12px}
+  header select{padding:5px 8px;border-radius:6px;border:none;min-width:160px}
+  header button{padding:5px 10px;border:none;border-radius:6px;background:#fff;color:var(--teal);
+    font-weight:bold;cursor:pointer}
+  .wrap{max-width:1320px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr 380px;gap:12px;align-items:start}
+  .col-out{position:sticky;top:12px}
+  .tabs{display:flex;gap:6px;margin-bottom:10px}
+  .tab{flex:1;padding:9px;text-align:center;border-radius:8px;border:2px solid var(--line);
+    background:#fff;cursor:pointer;font-size:13px;font-weight:bold;color:var(--sub)}
+  .tab.active{border-color:var(--teal);color:var(--teal);background:#e7f4f6}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
+  .card h2{margin:0;padding:8px 10px;font-size:13px;background:#eef3f4;border-bottom:1px solid var(--line);color:var(--teal)}
+  .card h2 .desc{font-weight:normal;font-size:11px;color:var(--sub);margin-left:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}
+  .field{display:flex;flex-direction:column;gap:3px}
+  .field.full{grid-column:1/3}
+  .field label{font-size:11px;color:var(--sub)}
+  .field .u{color:var(--sub);font-size:10px}
+  input[type=number],input[type=text],input[type=date],select.inp{
+    padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;
+    background:#fbfdfd;color:var(--ink);width:100%}
+  input:focus,select:focus{outline:none;border-color:var(--teal)}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:6px 12px;border-radius:16px;background:#eef3f4;border:1px solid var(--line);
+    color:var(--sub);font-size:12px;font-weight:bold;cursor:pointer;transition:.1s}
+  .chip:hover{border-color:#9fb3ba}
+  .chip.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+  .checkrow{display:flex;align-items:center;gap:6px;padding:2px 0}
+  .checkrow input{width:16px;height:16px;accent-color:var(--teal)}
+  .actions{display:flex;gap:8px;padding:8px}
+  .btn{flex:1;padding:9px;border:none;border-radius:7px;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit}
+  .btn-primary{background:var(--teal);color:#fff}
+  .btn-ghost{background:#eef3f4;color:var(--sub)}
+  .btn-sm{padding:4px 9px;font-size:11px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit}
+  /* 出力 */
+  .score-row{display:flex;gap:6px;padding:8px}
+  .score{flex:1;border-radius:8px;padding:8px;text-align:center;border:1px solid var(--line);background:#fbfdfd}
+  .score .lbl{font-size:11px;color:var(--sub)}
+  .score .val{font-size:24px;font-weight:800;line-height:1.1;margin:2px 0}
+  .score .tag{font-size:11px;font-weight:bold;border-radius:10px;padding:1px 8px;display:inline-block}
+  .t-low{background:#e3f5ec;color:var(--green)} .t-mid{background:#fdf0e0;color:var(--orange)}
+  .t-high{background:#f7e0e0;color:var(--red)} .t-na{background:#eef3f4;color:var(--sub)}
+  .gauge-wrap{padding:8px}
+  .gauge{position:relative;height:26px;border-radius:13px;overflow:visible;
+    background:linear-gradient(90deg,#1aa86b 0%,#7cc44a 25%,#e8923a 55%,#d9663a 78%,#c44 100%)}
+  .gauge .seg{position:absolute;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.6)}
+  .gauge .marker{position:absolute;top:-5px;width:3px;height:36px;background:#10303f;border-radius:2px;
+    box-shadow:0 0 0 2px #fff}
+  .gauge-lbls{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-top:6px}
+  .stage-txt{font-size:12px;padding:0 8px 8px;color:var(--ink)}
+  .surv{padding:8px;font-size:12px;line-height:1.6}
+  .surv .due{font-size:13px;font-weight:bold}
+  .banner{border-radius:8px;padding:8px 10px;margin:0 8px 8px;font-size:12px;line-height:1.55}
+  .b-green{background:#e3f5ec;border:1px solid #9ad8b8;color:#0c6e47}
+  .b-orange{background:#fdf0e0;border:1px solid #f0c389;color:#8a4d12}
+  .b-red{background:#f7e0e0;border:1px solid #e3a3a3;color:#922}
+  .b-gray{background:#eef3f4;border:1px solid var(--line);color:var(--sub)}
+  textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12px;
+    font-family:"Consolas","Meiryo",monospace;resize:vertical;background:#fbfdfd;color:var(--ink)}
+  /* テーブル */
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th,td{padding:5px 6px;border-bottom:1px solid #eef2f4;text-align:right;white-space:nowrap}
+  th{background:#eef3f4;color:var(--sub);position:sticky;top:0;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  tr:hover td{background:#f6fbfb}
+  .tbl-scroll{max-height:340px;overflow:auto}
+  .del{color:var(--red);cursor:pointer;font-weight:bold}
+  .hint{font-size:11px;color:var(--sub);padding:0 8px 8px;line-height:1.6}
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
+  .chart-box{border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff}
+  .chart-box .ct{font-size:12px;font-weight:bold;color:var(--teal);margin-bottom:2px}
+  .empty{padding:20px;text-align:center;color:var(--sub);font-size:12px}
+  .disclaimer{font-size:10px;color:var(--sub);line-height:1.6;padding:10px;border-top:1px solid var(--line)}
+  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#10303f;color:#fff;
+    padding:8px 16px;border-radius:8px;font-size:12px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+  .toast.show{opacity:1}
+  @media print{header .pt,.tabs,.actions,.btn,.del,.toast{display:none}.col-out{position:static}
+    .wrap{display:block}body{background:#fff}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🩺 肝疾患フォローアプリ</h1>
+    <div class="meta">脂肪肝・B/C肝炎｜生活習慣 × 検査データ可視化 ｜ 完全ローカル保存</div>
+  </div>
+  <div class="pt">
+    <select id="ptSel" onchange="switchPatient(this.value)"></select>
+    <button onclick="newPatient()">＋ 新規患者</button>
+    <button onclick="exportCSV()">CSV出力</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ============ 左：入力 ============ -->
+  <div class="col-in">
+    <div class="tabs">
+      <div class="tab active" id="tab-input" onclick="setTab('input')">📝 記録入力</div>
+      <div class="tab" id="tab-trend" onclick="setTab('trend')">📈 推移グラフ</div>
+      <div class="tab" id="tab-list" onclick="setTab('list')">📋 記録一覧</div>
+    </div>
+
+    <!-- ---- 患者基本情報（常時） ---- -->
+    <section class="card">
+      <h2>患者基本情報 <span class="desc">FIB-4・NFS・サーベイランス判定に使用</span></h2>
+      <div class="grid2">
+        <div class="field">
+          <label>氏名 / ID（任意・端末内のみ）</label>
+          <input type="text" id="ptName" oninput="savePatientMeta()" placeholder="例: A.S / 1024" />
+        </div>
+        <div class="field">
+          <label>生年月日（年齢を自動計算）</label>
+          <input type="date" id="ptBirth" oninput="savePatientMeta();recalc()" />
+        </div>
+        <div class="field full">
+          <label>性別</label>
+          <div class="chip-row" id="sexChips"></div>
+        </div>
+        <div class="field full">
+          <label>病因（HCCリスク群の判定に使用）</label>
+          <div class="chip-row" id="etioChips"></div>
+        </div>
+        <div class="field full">
+          <div class="checkrow"><input type="checkbox" id="ptDM" onchange="savePatientMeta();recalc()" />
+            <label for="ptDM">糖尿病あり / 空腹時血糖異常（IFG）— NAFLD Fibrosis Score に使用</label></div>
+        </div>
+        <div class="field">
+          <label>身長 <span class="u">(cm)</span></label>
+          <input type="number" id="ptHeight" inputmode="decimal" oninput="savePatientMeta();recalc()" placeholder="165" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- 記録入力タブ ---- -->
+    <div id="pane-input">
+      <section class="card">
+        <h2>受診記録の入力 <span class="desc">右側にFIB-4・NFS・線維化がリアルタイム表示</span></h2>
+        <div class="grid2">
+          <div class="field">
+            <label>受診日</label>
+            <input type="date" id="recDate" oninput="recalc()" />
+          </div>
+          <div class="field">
+            <label>体重 <span class="u">(kg)</span></label>
+            <input type="number" id="recWt" inputmode="decimal" oninput="recalc()" placeholder="68.0" />
+          </div>
+          <div class="field">
+            <label>飲酒量 <span class="u">(純アルコール g/日)</span></label>
+            <input type="number" id="recAlc" inputmode="decimal" oninput="recalc()" placeholder="0" />
+          </div>
+          <div class="field">
+            <label>血小板 <span class="u">(万/μL)</span></label>
+            <input type="number" id="recPlt" inputmode="decimal" oninput="recalc()" placeholder="20.0" />
+          </div>
+          <div class="field">
+            <label>AST <span class="u">(U/L)</span></label>
+            <input type="number" id="recAst" inputmode="decimal" oninput="recalc()" placeholder="30" />
+          </div>
+          <div class="field">
+            <label>ALT <span class="u">(U/L)</span></label>
+            <input type="number" id="recAlt" inputmode="decimal" oninput="recalc()" placeholder="35" />
+          </div>
+          <div class="field">
+            <label>Alb <span class="u">(g/dL)</span></label>
+            <input type="number" id="recAlb" inputmode="decimal" oninput="recalc()" placeholder="4.2" />
+          </div>
+          <div class="field">
+            <label>AFP <span class="u">(ng/mL・任意)</span></label>
+            <input type="number" id="recAfp" inputmode="decimal" oninput="recalc()" placeholder="" />
+          </div>
+          <div class="field">
+            <label>PIVKA-II <span class="u">(mAU/mL・任意)</span></label>
+            <input type="number" id="recPivka" inputmode="decimal" oninput="recalc()" placeholder="" />
+          </div>
+          <div class="field">
+            <div class="checkrow"><input type="checkbox" id="recUS" />
+              <label for="recUS">本日 腹部エコー（US）実施<br>→ サーベイランス起算日を更新</label></div>
+          </div>
+        </div>
+        <div class="hint">純アルコール量 = 量(mL) × 度数(%) ÷ 100 × 0.8。例: ビール500mL(5%)=20g、日本酒1合=約22g、ワイン1杯(120mL,12%)≒12g。</div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="saveRecord()">この受診記録を保存</button>
+          <button class="btn btn-ghost" onclick="clearRecordForm()">入力クリア</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---- 推移グラフタブ ---- -->
+    <div id="pane-trend" style="display:none">
+      <section class="card">
+        <h2>推移グラフ <span class="desc">生活習慣 × 検査データ</span></h2>
+        <div class="charts" id="charts"></div>
+      </section>
+    </div>
+
+    <!-- ---- 記録一覧タブ ---- -->
+    <div id="pane-list" style="display:none">
+      <section class="card">
+        <h2>記録一覧 <span class="desc">行クリックでフォームに読み込み</span></h2>
+        <div class="tbl-scroll"><table id="recTable"></table></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ 右：出力（sticky） ============ -->
+  <div class="col-out">
+    <section class="card">
+      <h2>線維化スコア <span class="desc" id="ageNote"></span></h2>
+      <div class="score-row">
+        <div class="score">
+          <div class="lbl">FIB-4 index</div>
+          <div class="val" id="oFib">–</div>
+          <div class="tag t-na" id="oFibTag">–</div>
+        </div>
+        <div class="score">
+          <div class="lbl">NAFLD Fibrosis Score</div>
+          <div class="val" id="oNfs">–</div>
+          <div class="tag t-na" id="oNfsTag">–</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>線維化ステージ推定 <span class="desc">FIB-4 ベース</span></h2>
+      <div class="gauge-wrap">
+        <div class="gauge" id="gauge">
+          <div class="marker" id="gMarker" style="left:0%"></div>
+        </div>
+        <div class="gauge-lbls"><span>F0–1</span><span>1.3</span><span>F2–3</span><span>2.67</span><span>F4</span></div>
+      </div>
+      <div class="stage-txt" id="stageTxt">データを入力してください。</div>
+    </section>
+
+    <section class="card">
+      <h2>HCCサーベイランス <span class="desc">肝癌診療ガイドライン準拠の目安</span></h2>
+      <div class="banner b-gray" id="survBanner">病因と線維化を入力すると判定します。</div>
+      <div class="surv" id="survDetail"></div>
+    </section>
+
+    <section class="card">
+      <h2>カルテ貼付テキスト</h2>
+      <div style="padding:8px">
+        <textarea id="karte" rows="8" readonly></textarea>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="copyKarte()">📋 コピー</button>
+      </div>
+    </section>
+
+    <div class="disclaimer">
+      ※ 本アプリは診療補助のための参考ツールです。FIB-4・NAFLD Fibrosis Score・線維化ステージ表示は
+      非侵襲的な推定であり確定診断ではありません。サーベイランス間隔は日本肝臓学会
+      「肝癌診療ガイドライン」のサーベイランス・アルゴリズムに基づく一般的目安で、最終的な判断・
+      適応は患者状態と最新ガイドラインに基づき医師が行ってください。データは本端末のブラウザ
+      （localStorage）にのみ保存され、外部送信されません。患者識別情報の入力は院内規定に従ってください。
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================== 定数・マスタ ====================== */
+const SEXES = [{id:'M',n:'男性'},{id:'F',n:'女性'}];
+const ETIOS = [
+  {id:'nafld', n:'脂肪肝(NAFLD/MASLD)'},
+  {id:'b_chronic', n:'B型慢性肝炎'},
+  {id:'c_chronic', n:'C型慢性肝炎'},
+  {id:'b_cirr', n:'B型肝硬変'},
+  {id:'c_cirr', n:'C型肝硬変'},
+  {id:'nbnc_cirr', n:'非B非C肝硬変'},
+  {id:'other', n:'その他/混合'},
+];
+const LS_KEY = 'liverFollowUp.v1';
+
+/* ====================== 状態 ====================== */
+let store = { patients: [], current: null };
+let editingIndex = -1; // 編集中レコード（-1=新規）
+
+const $ = id => document.getElementById(id);
+
+/* ====================== 永続化 ====================== */
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s&&s.patients) store = s; }catch(e){}
+  if(store.patients.length===0){
+    store.patients.push(blankPatient('患者1'));
+    store.current = store.patients[0].id;
+  }
+  if(!store.current) store.current = store.patients[0].id;
+}
+function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(store)); }
+function blankPatient(name){
+  return { id:'p'+Date.now()+Math.floor(Math.random()*1000), name:name||'',
+    sex:'M', birth:'', dm:false, height:null, etio:'nafld', records:[] };
+}
+function cur(){ return store.patients.find(p=>p.id===store.current) || store.patients[0]; }
+
+/* ====================== 患者管理 ====================== */
+function renderPtSelect(){
+  const sel=$('ptSel'); sel.innerHTML='';
+  store.patients.forEach(p=>{
+    const o=document.createElement('option'); o.value=p.id;
+    o.textContent=(p.name||'(無名)')+'｜'+(p.records.length)+'件';
+    if(p.id===store.current) o.selected=true; sel.appendChild(o);
+  });
+}
+function switchPatient(id){ store.current=id; editingIndex=-1; persist(); loadPatientToForm(); refreshAll(); }
+function newPatient(){
+  const p=blankPatient('患者'+(store.patients.length+1));
+  store.patients.push(p); store.current=p.id; editingIndex=-1; persist();
+  loadPatientToForm(); refreshAll(); toast('新規患者を作成しました');
+}
+function savePatientMeta(){
+  const p=cur();
+  p.name=$('ptName').value.trim();
+  p.birth=$('ptBirth').value;
+  p.dm=$('ptDM').checked;
+  p.height=parseFloat($('ptHeight').value)||null;
+  persist(); renderPtSelect();
+}
+function loadPatientToForm(){
+  const p=cur();
+  $('ptName').value=p.name||'';
+  $('ptBirth').value=p.birth||'';
+  $('ptDM').checked=!!p.dm;
+  $('ptHeight').value=p.height??'';
+  renderChips('sexChips',SEXES,p.sex,id=>{p.sex=id;persist();refreshAll();});
+  renderChips('etioChips',ETIOS,p.etio,id=>{p.etio=id;persist();refreshAll();});
+}
+function renderChips(boxId,items,selId,onPick){
+  const box=$(boxId); box.innerHTML='';
+  items.forEach(it=>{
+    const c=document.createElement('div');
+    c.className='chip'+(it.id===selId?' sel':''); c.textContent=it.n;
+    c.onclick=()=>{ onPick(it.id); renderChips(boxId,items,it.id,onPick); };
+    box.appendChild(c);
+  });
+}
+
+/* ====================== 計算ロジック ====================== */
+function ageAt(birth,dateStr){
+  if(!birth) return null;
+  const b=new Date(birth), d=dateStr?new Date(dateStr):new Date();
+  if(isNaN(b)) return null;
+  let a=d.getFullYear()-b.getFullYear();
+  const m=d.getMonth()-b.getMonth();
+  if(m<0||(m===0&&d.getDate()<b.getDate())) a--;
+  return a>=0&&a<130?a:null;
+}
+// FIB-4 = Age × AST / (Plt[10^9/L] × √ALT)  ※Plt[10^9/L] = 万/μL × 10
+function calcFib4(age,ast,alt,pltMan){
+  if(!age||!ast||!alt||!pltMan||alt<=0) return null;
+  const plt=pltMan*10;
+  return (age*ast)/(plt*Math.sqrt(alt));
+}
+// NFS = -1.675 +0.037·age +0.094·BMI +1.13·DM +0.99·(AST/ALT) -0.013·Plt[10^9/L] -0.66·Alb
+function calcNfs(age,bmi,dm,ast,alt,pltMan,alb){
+  if(!age||!bmi||!ast||!alt||!pltMan||!alb||alt<=0) return null;
+  const plt=pltMan*10;
+  return -1.675 +0.037*age +0.094*bmi +1.13*(dm?1:0) +0.99*(ast/alt) -0.013*plt -0.66*alb;
+}
+// FIB-4 判定（年齢別下限カットオフ）
+function fib4Risk(v,age){
+  if(v==null) return {cls:'t-na',txt:'–',level:'na'};
+  const low = (age!=null&&age>=65)?2.0:1.3;
+  if(v<low)  return {cls:'t-low', txt:'低リスク', level:'low'};
+  if(v>2.67) return {cls:'t-high',txt:'高リスク', level:'high'};
+  return {cls:'t-mid', txt:'判定保留', level:'mid'};
+}
+// NFS 判定（年齢別下限カットオフ）
+function nfsRisk(v,age){
+  if(v==null) return {cls:'t-na',txt:'–',level:'na'};
+  const low = (age!=null&&age>=65)?0.12:-1.455;
+  if(v<low)   return {cls:'t-low', txt:'低リスク', level:'low'};
+  if(v>0.676) return {cls:'t-high',txt:'高リスク', level:'high'};
+  return {cls:'t-mid', txt:'判定保留', level:'mid'};
+}
+// FIB-4 → ゲージ位置(0-100%)
+function fib4ToPct(v){
+  if(v==null) return null;
+  // 0→0%, 1.3→33%, 2.67→66%, 4.5+→100% の区分線形
+  if(v<=1.3) return (v/1.3)*33;
+  if(v<=2.67) return 33+((v-1.3)/(2.67-1.3))*33;
+  const t=Math.min((v-2.67)/(4.5-2.67),1);
+  return 66+t*34;
+}
+function fib4Stage(v,age){
+  const r=fib4Risk(v,age);
+  if(r.level==='na') return 'データを入力してください。';
+  if(r.level==='low') return 'F0–F1相当（進行した線維化は否定的）。経過観察を継続。';
+  if(r.level==='high') return 'F3–F4相当の可能性（進行した線維化を示唆）。専門医評価・エラストグラフィ等の精査を推奨。';
+  return 'F2–F3のグレーゾーン（判定保留）。FibroScan/血清マーカー等での追加評価を検討。';
+}
+
+/* ====================== HCCサーベイランス判定 ====================== */
+function surveillance(p, fib4, age){
+  const e=p.etio;
+  const cirr = (e==='b_cirr'||e==='c_cirr'||e==='nbnc_cirr');
+  const bcVirus = (e==='b_chronic'||e==='c_chronic'||e==='b_cirr'||e==='c_cirr');
+  const bcCirr = (e==='b_cirr'||e==='c_cirr');
+  // FIB-4高値 → 肝硬変相当として扱う補正
+  const fibHigh = (fib4!=null && fib4>2.67);
+
+  let group, banner, intervalMo, detail, modalities;
+  if(bcCirr){
+    group='超高危険群'; banner='b-red'; intervalMo=3;
+    modalities='腹部US 3〜4か月毎 ＋ 腫瘍マーカー（AFP・AFP-L3・PIVKA-II）。造影CT/MRIを6〜12か月毎に併用。';
+  } else if(cirr || (bcVirus&&fibHigh)){
+    group='高危険群（肝硬変相当）'; banner='b-red'; intervalMo=6;
+    modalities='腹部US 6か月毎 ＋ 腫瘍マーカー（AFP・AFP-L3・PIVKA-II）。必要に応じ造影CT/MRI。';
+    if(bcVirus&&fibHigh&&!cirr) group='高危険群（FIB-4高値→肝硬変相当の精査を）';
+  } else if(bcVirus){
+    group='高危険群'; banner='b-orange'; intervalMo=6;
+    modalities='腹部US 6か月毎 ＋ 腫瘍マーカー（AFP・PIVKA-II 等）。';
+  } else if(fibHigh){
+    group='要注意（線維化進行）'; banner='b-orange'; intervalMo=6;
+    modalities='非B非Cでも線維化進行例はHCCリスクあり。US 6か月毎相当のフォローと専門医評価を検討。';
+  } else {
+    group='サーベイランス対象外'; banner='b-green'; intervalMo=null;
+    modalities='定期的なHCCサーベイランスの一律対象ではないが、線維化進行・肥満・糖尿病があれば個別に検討。';
+  }
+
+  // 最終US日（usDone=true の最新レコード）
+  let lastUS=null;
+  p.records.forEach(r=>{ if(r.us && r.date && (!lastUS||r.date>lastUS)) lastUS=r.date; });
+
+  let dueLine='';
+  if(intervalMo){
+    if(lastUS){
+      const due=new Date(lastUS); due.setMonth(due.getMonth()+intervalMo);
+      const today=new Date(); today.setHours(0,0,0,0);
+      const diff=Math.round((due-today)/86400000);
+      const ds=due.toISOString().slice(0,10);
+      if(diff<0) dueLine=`<span class="due" style="color:var(--red)">⚠ 次回US予定 ${ds}（${-diff}日 超過）</span>`;
+      else if(diff<=30) dueLine=`<span class="due" style="color:var(--orange)">次回US予定 ${ds}（あと${diff}日）</span>`;
+      else dueLine=`<span class="due" style="color:var(--green)">次回US予定 ${ds}（あと${diff}日）</span>`;
+      dueLine+=`<br><span style="color:var(--sub)">最終US: ${lastUS} ／ 推奨間隔: ${intervalMo}か月`+(group==='超高危険群'?'（3〜4か月）':'')+`</span>`;
+    } else {
+      dueLine=`<span class="due" style="color:var(--orange)">⚠ US実施記録なし — ベースラインのエコーを実施し起算日を登録してください</span>`;
+    }
+  }
+  return {group,banner,modalities,dueLine,intervalMo,lastUS};
+}
+
+/* ====================== 出力描画 ====================== */
+function getFormVals(){
+  const p=cur();
+  const date=$('recDate').value;
+  return {
+    date,
+    age: ageAt(p.birth,date),
+    wt: parseFloat($('recWt').value)||null,
+    alc: ($('recAlc').value===''?null:parseFloat($('recAlc').value)),
+    plt: parseFloat($('recPlt').value)||null,
+    ast: parseFloat($('recAst').value)||null,
+    alt: parseFloat($('recAlt').value)||null,
+    alb: parseFloat($('recAlb').value)||null,
+    afp: ($('recAfp').value===''?null:parseFloat($('recAfp').value)),
+    pivka: ($('recPivka').value===''?null:parseFloat($('recPivka').value)),
+    us: $('recUS').checked,
+  };
+}
+function recalc(){
+  const p=cur();
+  const v=getFormVals();
+  const bmi=(p.height&&v.wt)?(v.wt/Math.pow(p.height/100,2)):null;
+  const fib4=calcFib4(v.age,v.ast,v.alt,v.plt);
+  const nfs=calcNfs(v.age,bmi,p.dm,v.ast,v.alt,v.plt,v.alb);
+  const fr=fib4Risk(fib4,v.age), nr=nfsRisk(nfs,v.age);
+
+  $('ageNote').textContent = v.age!=null?('受診時 '+v.age+'歳'+(v.age>=65?'・65歳以上カットオフ適用':'')):'年齢未設定';
+  $('oFib').textContent = fib4!=null?fib4.toFixed(2):'–';
+  $('oFibTag').textContent=fr.txt; $('oFibTag').className='tag '+fr.cls;
+  $('oNfs').textContent = nfs!=null?nfs.toFixed(2):'–';
+  $('oNfsTag').textContent=nr.txt; $('oNfsTag').className='tag '+nr.cls;
+
+  // ゲージ
+  const pct=fib4ToPct(fib4);
+  $('gMarker').style.left = pct!=null?(pct+'%'):'0%';
+  $('gMarker').style.display = pct!=null?'block':'none';
+  $('stageTxt').textContent = fib4Stage(fib4,v.age);
+
+  // サーベイランス
+  const s=surveillance(p,fib4,v.age);
+  $('survBanner').className='banner '+s.banner;
+  $('survBanner').innerHTML='<b>リスク群: '+s.group+'</b>';
+  $('survDetail').innerHTML = s.modalities + (s.dueLine?('<br><br>'+s.dueLine):'');
+
+  // カルテテキスト
+  $('karte').value = buildKarte(p,v,bmi,fib4,nfs,fr,nr,s);
+}
+function buildKarte(p,v,bmi,fib4,nfs,fr,nr,s){
+  const L=[];
+  L.push('【肝疾患フォロー】'+(v.date||'')+(p.name?(' / '+p.name):''));
+  const etioN=(ETIOS.find(e=>e.id===p.etio)||{}).n||'';
+  L.push('病因: '+etioN+(v.age!=null?(' / '+v.age+'歳'):'')+' / '+(SEXES.find(x=>x.id===p.sex)||{}).n);
+  const labs=[];
+  if(v.ast!=null)labs.push('AST '+v.ast); if(v.alt!=null)labs.push('ALT '+v.alt);
+  if(v.plt!=null)labs.push('Plt '+v.plt+'万'); if(v.alb!=null)labs.push('Alb '+v.alb);
+  if(v.wt!=null)labs.push('体重 '+v.wt+'kg'); if(bmi)labs.push('BMI '+bmi.toFixed(1));
+  if(v.alc!=null)labs.push('飲酒 '+v.alc+'g/日');
+  if(v.afp!=null)labs.push('AFP '+v.afp); if(v.pivka!=null)labs.push('PIVKA-II '+v.pivka);
+  if(labs.length)L.push(labs.join(' / '));
+  if(fib4!=null)L.push('FIB-4 '+fib4.toFixed(2)+'（'+fr.txt+'）');
+  if(nfs!=null)L.push('NFS '+nfs.toFixed(2)+'（'+nr.txt+'）');
+  L.push('線維化推定: '+fib4Stage(fib4,v.age));
+  L.push('HCCサーベイランス: '+s.group+' / '+s.modalities.replace(/<[^>]+>/g,''));
+  if(s.lastUS)L.push('最終US '+s.lastUS+(s.intervalMo?('（間隔'+s.intervalMo+'か月）'):''));
+  return L.join('\n');
+}
+
+/* ====================== レコード保存・一覧 ====================== */
+function saveRecord(){
+  const p=cur(); const v=getFormVals();
+  if(!v.date){ toast('受診日を入力してください'); return; }
+  const rec={date:v.date,wt:v.wt,alc:v.alc,plt:v.plt,ast:v.ast,alt:v.alt,alb:v.alb,afp:v.afp,pivka:v.pivka,us:v.us};
+  if(editingIndex>=0){ p.records[editingIndex]=rec; editingIndex=-1; toast('記録を更新しました'); }
+  else {
+    const ex=p.records.findIndex(r=>r.date===v.date);
+    if(ex>=0){ p.records[ex]=rec; toast('同日の記録を上書きしました'); }
+    else { p.records.push(rec); toast('記録を保存しました'); }
+  }
+  p.records.sort((a,b)=>a.date<b.date?-1:1);
+  persist(); refreshAll();
+}
+function clearRecordForm(){
+  editingIndex=-1;
+  ['recWt','recAlc','recPlt','recAst','recAlt','recAlb','recAfp','recPivka'].forEach(id=>$(id).value='');
+  $('recUS').checked=false; $('recDate').value=todayStr(); recalc();
+}
+function loadRecord(i){
+  const r=cur().records[i]; if(!r) return;
+  editingIndex=i;
+  $('recDate').value=r.date; $('recWt').value=r.wt??''; $('recAlc').value=r.alc??'';
+  $('recPlt').value=r.plt??''; $('recAst').value=r.ast??''; $('recAlt').value=r.alt??'';
+  $('recAlb').value=r.alb??''; $('recAfp').value=r.afp??''; $('recPivka').value=r.pivka??'';
+  $('recUS').checked=!!r.us;
+  setTab('input'); recalc(); toast('記録を読み込みました（保存で更新）');
+}
+function delRecord(i,ev){
+  ev.stopPropagation();
+  if(!confirm('この記録を削除しますか？')) return;
+  cur().records.splice(i,1); persist(); refreshAll(); toast('削除しました');
+}
+function renderTable(){
+  const p=cur(); const t=$('recTable');
+  if(p.records.length===0){ t.innerHTML='<tr><td class="empty" colspan="9">記録がありません</td></tr>'; return; }
+  let h='<tr><th>受診日</th><th>体重</th><th>飲酒</th><th>AST</th><th>ALT</th><th>Plt</th><th>FIB-4</th><th>US</th><th></th></tr>';
+  p.records.slice().reverse().forEach((r)=>{
+    const idx=p.records.indexOf(r);
+    const age=ageAt(p.birth,r.date);
+    const f=calcFib4(age,r.ast,r.alt,r.plt);
+    const fr=fib4Risk(f,age);
+    h+=`<tr onclick="loadRecord(${idx})">
+      <td>${r.date}</td><td>${r.wt??'–'}</td><td>${r.alc??'–'}</td>
+      <td>${r.ast??'–'}</td><td>${r.alt??'–'}</td><td>${r.plt??'–'}</td>
+      <td style="font-weight:bold;color:${fcolor(fr.level)}">${f!=null?f.toFixed(2):'–'}</td>
+      <td>${r.us?'✔':''}</td><td><span class="del" onclick="delRecord(${idx},event)">✕</span></td></tr>`;
+  });
+  t.innerHTML=h;
+}
+function fcolor(level){ return level==='high'?'var(--red)':level==='mid'?'var(--orange)':level==='low'?'var(--green)':'var(--sub)'; }
+
+/* ====================== 推移グラフ（自作SVG） ====================== */
+function renderCharts(){
+  const p=cur(); const box=$('charts');
+  if(p.records.length<1){ box.innerHTML='<div class="empty" style="grid-column:1/3">記録を入力するとグラフが表示されます</div>'; return; }
+  const recs=p.records.slice().sort((a,b)=>a.date<b.date?-1:1);
+  const series=[
+    {key:'wt', t:'体重 (kg)', col:'#0d7e8f'},
+    {key:'alc',t:'飲酒量 (g/日)', col:'#1f7fc4'},
+    {key:'alt',t:'ALT (U/L)', col:'#e8923a'},
+    {key:'fib4',t:'FIB-4 index', col:'#c44', refs:[1.3,2.67]},
+  ];
+  box.innerHTML='';
+  series.forEach(s=>{
+    const pts=recs.map(r=>{
+      let y;
+      if(s.key==='fib4'){ y=calcFib4(ageAt(p.birth,r.date),r.ast,r.alt,r.plt); }
+      else y=r[s.key];
+      return {date:r.date, y:(y==null||isNaN(y))?null:y};
+    }).filter(d=>d.y!=null);
+    const div=document.createElement('div'); div.className='chart-box';
+    div.innerHTML='<div class="ct">'+s.t+'</div>'+lineChart(pts,s.col,s.refs);
+    box.appendChild(div);
+  });
+}
+function lineChart(pts,color,refs){
+  const W=300,H=130,pl=34,pr=8,pt=8,pb=22;
+  if(pts.length===0) return '<svg viewBox="0 0 '+W+' '+H+'"><text x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle" fill="#9fb3ba" font-size="11">データなし</text></svg>';
+  let ys=pts.map(p=>p.y); let min=Math.min(...ys), max=Math.max(...ys);
+  if(refs) refs.forEach(r=>{ min=Math.min(min,r); max=Math.max(max,r); });
+  if(min===max){ min-=1; max+=1; }
+  const pad=(max-min)*0.12; min-=pad; max+=pad;
+  const n=pts.length;
+  const xAt=i=> pl + (n===1? (W-pl-pr)/2 : (i/(n-1))*(W-pl-pr));
+  const yAt=v=> pt + (1-(v-min)/(max-min))*(H-pt-pb);
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  // y軸グリッド3本
+  for(let k=0;k<=2;k++){
+    const val=min+(max-min)*k/2; const y=yAt(val);
+    svg+='<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="#eef2f4"/>';
+    svg+='<text x="'+(pl-4)+'" y="'+(y+3)+'" text-anchor="end" fill="#9fb3ba" font-size="9">'+fmtAxis(val)+'</text>';
+  }
+  // 参照ライン（FIB-4カットオフ）
+  if(refs) refs.forEach(r=>{ const y=yAt(r);
+    svg+='<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="#c44" stroke-dasharray="3 3" stroke-width="1" opacity="0.5"/>';
+    svg+='<text x="'+(W-pr)+'" y="'+(y-2)+'" text-anchor="end" fill="#c44" font-size="8">'+r+'</text>'; });
+  // 折れ線
+  let d=''; pts.forEach((p,i)=>{ d+=(i===0?'M':'L')+xAt(i).toFixed(1)+' '+yAt(p.y).toFixed(1)+' '; });
+  if(pts.length>1) svg+='<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2"/>';
+  pts.forEach((p,i)=>{ svg+='<circle cx="'+xAt(i)+'" cy="'+yAt(p.y)+'" r="2.6" fill="'+color+'"/>'; });
+  // x軸ラベル（最初と最後）
+  const lab=i=>{ const dt=pts[i].date; return dt.slice(2).replace(/-/g,'/'); };
+  svg+='<text x="'+xAt(0)+'" y="'+(H-6)+'" text-anchor="start" fill="#9fb3ba" font-size="8">'+lab(0)+'</text>';
+  if(n>1) svg+='<text x="'+xAt(n-1)+'" y="'+(H-6)+'" text-anchor="end" fill="#9fb3ba" font-size="8">'+lab(n-1)+'</text>';
+  svg+='</svg>';
+  return svg;
+}
+function fmtAxis(v){ return Math.abs(v)>=100?v.toFixed(0):v.toFixed(1); }
+
+/* ====================== CSV出力 ====================== */
+function exportCSV(){
+  const p=cur();
+  if(p.records.length===0){ toast('記録がありません'); return; }
+  const head=['受診日','年齢','体重kg','飲酒g/日','AST','ALT','血小板万/μL','Alb','AFP','PIVKA-II','FIB-4','NFS','US実施'];
+  const rows=[head];
+  p.records.forEach(r=>{
+    const age=ageAt(p.birth,r.date);
+    const bmi=(p.height&&r.wt)?(r.wt/Math.pow(p.height/100,2)):null;
+    const f=calcFib4(age,r.ast,r.alt,r.plt);
+    const nf=calcNfs(age,bmi,p.dm,r.ast,r.alt,r.plt,r.alb);
+    rows.push([r.date,age??'',r.wt??'',r.alc??'',r.ast??'',r.alt??'',r.plt??'',r.alb??'',r.afp??'',r.pivka??'',
+      f!=null?f.toFixed(2):'',nf!=null?nf.toFixed(2):'',r.us?'1':'']);
+  });
+  const csv=rows.map(r=>r.map(c=>('"'+String(c).replace(/"/g,'""')+'"')).join(',')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='肝疾患フォロー_'+(p.name||p.id)+'_'+todayStr()+'.csv'; a.click();
+  toast('CSVを出力しました');
+}
+
+/* ====================== UI ====================== */
+function setTab(t){
+  ['input','trend','list'].forEach(x=>{
+    $('tab-'+x).classList.toggle('active',x===t);
+    $('pane-'+x).style.display = x===t?'block':'none';
+  });
+  if(t==='trend') renderCharts();
+  if(t==='list') renderTable();
+}
+function refreshAll(){ renderPtSelect(); renderTable(); renderCharts(); recalc(); }
+function copyKarte(){
+  const ta=$('karte'); ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>toast('コピーしました')).catch(()=>{document.execCommand('copy');toast('コピーしました');});
+}
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/* ====================== 初期化 ====================== */
+load();
+loadPatientToForm();
+$('recDate').value=todayStr();
+refreshAll();
+</script>
+</body>
+</html>

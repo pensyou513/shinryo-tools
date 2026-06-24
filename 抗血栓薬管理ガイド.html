@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d47a1">
+<title>抗血栓薬 休薬管理ガイド</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#ffffff; --ink:#1a2233; --sub:#5b6678;
+    --line:#e2e7f0; --primary:#1565c0; --primary-d:#0d47a1;
+    --green:#2e7d32; --green-bg:#e8f5e9; --red:#c62828; --red-bg:#fdecea;
+    --amber:#e65100; --amber-bg:#fff4e5; --highest:#8e0000;
+    --shadow:0 2px 10px rgba(20,40,80,.07);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6;
+    font-size:15px; -webkit-text-size-adjust:100%;
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(135deg,var(--primary-d),var(--primary));
+    color:#fff; padding:14px 16px 12px; box-shadow:var(--shadow);
+  }
+  header h1{margin:0; font-size:17px; font-weight:700; letter-spacing:.02em}
+  header p{margin:2px 0 0; font-size:11px; opacity:.85}
+  .steps{display:flex; gap:6px; margin-top:12px}
+  .steps .s{
+    flex:1; text-align:center; font-size:10px; font-weight:700;
+    padding:6px 2px 5px; border-radius:8px; background:rgba(255,255,255,.15);
+    color:rgba(255,255,255,.7); transition:.2s;
+  }
+  .steps .s.active{background:#fff; color:var(--primary-d)}
+  .steps .s.done{background:rgba(255,255,255,.35); color:#fff}
+  .steps .s .n{display:block; font-size:14px}
+  main{padding:16px 14px 120px; max-width:640px; margin:0 auto}
+  .panel{display:none; animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:14px; box-shadow:var(--shadow);
+  }
+  .card h2{margin:0 0 4px; font-size:16px}
+  .lead{color:var(--sub); font-size:12.5px; margin:0 0 14px}
+  label.fld{display:block; margin-bottom:14px}
+  label.fld span{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:var(--sub)}
+  input,select{
+    width:100%; padding:12px; font-size:16px; border:1.5px solid var(--line);
+    border-radius:10px; background:#fbfcfe; color:var(--ink); outline:none;
+  }
+  input:focus,select:focus{border-color:var(--primary)}
+  .seg{display:flex; gap:8px}
+  .seg button{
+    flex:1; padding:12px; font-size:15px; font-weight:700; border:1.5px solid var(--line);
+    border-radius:10px; background:#fbfcfe; color:var(--sub);
+  }
+  .seg button.on{background:var(--primary); color:#fff; border-color:var(--primary)}
+  .crcl-box{
+    margin-top:6px; padding:14px; border-radius:12px; text-align:center;
+    background:var(--green-bg); border:1px solid #c8e6c9;
+  }
+  .crcl-box .v{font-size:30px; font-weight:800; color:var(--green); line-height:1.1}
+  .crcl-box .u{font-size:13px; color:var(--sub)}
+  .crcl-box .cat{font-size:12px; font-weight:700; margin-top:4px}
+  .crcl-box.warn{background:var(--amber-bg); border-color:#ffcc80}
+  .crcl-box.warn .v{color:var(--amber)}
+  .opt{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid var(--line);
+    border-radius:11px; margin-bottom:9px; background:#fbfcfe; cursor:pointer; transition:.15s;
+  }
+  .opt:active{transform:scale(.99)}
+  .opt.sel{border-color:var(--primary); background:#eef5ff}
+  .opt .chk{
+    width:22px; height:22px; flex:none; border-radius:50%; border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; transition:.15s;
+  }
+  .opt.sel .chk{background:var(--primary); border-color:var(--primary)}
+  .opt .body{flex:1; min-width:0}
+  .opt .gname{font-weight:700; font-size:14.5px}
+  .opt .bname{font-size:11.5px; color:var(--sub); margin-top:1px}
+  .opt .tag{
+    font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:20px; flex:none;
+    background:#eef1f6; color:var(--sub);
+  }
+  .grouphead{font-size:11px; font-weight:800; color:var(--sub); margin:16px 0 8px; letter-spacing:.04em}
+  .grouphead:first-child{margin-top:0}
+  .risk-low{background:#e3f0fd; color:#1565c0}
+  .risk-mid{background:#fff8e1; color:#b26a00}
+  .risk-high{background:var(--red-bg); color:var(--red)}
+  .risk-highest{background:#ffdede; color:var(--highest)}
+  .navbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:20; display:flex; gap:10px;
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.94);
+    backdrop-filter:blur(8px); border-top:1px solid var(--line); max-width:640px; margin:0 auto;
+  }
+  .btn{
+    flex:1; padding:14px; font-size:15px; font-weight:700; border:none; border-radius:12px;
+    background:var(--primary); color:#fff; transition:.15s;
+  }
+  .btn:disabled{opacity:.4}
+  .btn.ghost{background:#eef1f6; color:var(--ink); flex:.7}
+  .btn:active:not(:disabled){transform:scale(.98)}
+  /* results */
+  .pill{display:inline-block; font-size:11px; font-weight:800; padding:3px 10px; border-radius:20px; margin-bottom:8px}
+  .res{border-radius:13px; padding:14px; margin-bottom:12px; border:1px solid var(--line); background:#fff}
+  .res.cont{border-left:5px solid var(--green)}
+  .res.brief{border-left:5px solid var(--amber)}
+  .res.stop{border-left:5px solid var(--red)}
+  .res .rh{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+  .res .rname{font-weight:800; font-size:15px}
+  .res .rbrand{font-size:11px; color:var(--sub); font-weight:400}
+  .res .verdict{font-size:13px; font-weight:800; white-space:nowrap}
+  .res .verdict.c{color:var(--green)}
+  .res .verdict.b{color:var(--amber)}
+  .res .verdict.s{color:var(--red)}
+  .res .row{display:flex; gap:8px; margin-top:9px; font-size:13px}
+  .res .row .k{flex:none; width:74px; color:var(--sub); font-weight:700; font-size:11.5px; padding-top:1px}
+  .res .row .v{flex:1}
+  .res .note{margin-top:9px; font-size:11.5px; color:var(--sub); background:#f7f9fc; padding:8px 10px; border-radius:8px}
+  .bridge{margin-top:9px; font-size:12px; padding:9px 11px; border-radius:9px; background:var(--amber-bg); color:var(--amber); border:1px solid #ffcc80}
+  .alert{
+    padding:13px 14px; border-radius:12px; margin-bottom:14px; font-size:12.5px;
+    background:var(--red-bg); border:1px solid #f5c6c0; color:#922;
+  }
+  .alert b{color:var(--red)}
+  .alert.amber{background:var(--amber-bg); border-color:#ffcc80; color:#7a3b00}
+  .summary{
+    display:flex; flex-wrap:wrap; gap:8px 14px; font-size:12.5px; color:var(--sub);
+    background:#eef2f8; border-radius:11px; padding:12px 14px; margin-bottom:14px;
+  }
+  .summary b{color:var(--ink)}
+  .disclaimer{font-size:10.5px; color:var(--sub); text-align:center; margin-top:18px; line-height:1.5}
+  .empty{text-align:center; color:var(--sub); padding:30px 10px; font-size:13px}
+  .restart{display:block; width:100%; margin-top:6px; padding:13px; font-weight:700; font-size:14px;
+    border:1.5px solid var(--line); border-radius:12px; background:#fff; color:var(--primary)}
+  details.ref{margin-top:10px; font-size:11.5px; color:var(--sub)}
+  details.ref summary{font-weight:700; cursor:pointer; padding:6px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>💊 抗血栓薬 休薬管理ガイド</h1>
+  <p>JCS2022 / 消化器内視鏡GL（2012・追補2017）準拠</p>
+  <div class="steps" id="stepsBar">
+    <div class="s active" data-s="1"><span class="n">1</span>患者</div>
+    <div class="s" data-s="2"><span class="n">2</span>薬剤</div>
+    <div class="s" data-s="3"><span class="n">3</span>処置</div>
+    <div class="s" data-s="4"><span class="n">4</span>判定</div>
+  </div>
+</header>
+
+<main>
+  <!-- STEP 1 -->
+  <section class="panel active" id="p1">
+    <div class="card">
+      <h2>STEP 1 — 腎機能の確認</h2>
+      <p class="lead">Cockcroft-Gault式でクレアチニンクリアランス（CrCl）を算出します。DOACの休薬期間決定に使用します。不要ならスキップ可能です。</p>
+      <label class="fld">
+        <span>性別</span>
+        <div class="seg" id="sexSeg">
+          <button type="button" data-sex="male">男性</button>
+          <button type="button" data-sex="female">女性</button>
+        </div>
+      </label>
+      <label class="fld">
+        <span>年齢（歳）</span>
+        <input type="number" id="age" inputmode="numeric" placeholder="例: 72" min="0" max="120">
+      </label>
+      <label class="fld">
+        <span>体重（kg）</span>
+        <input type="number" id="weight" inputmode="decimal" placeholder="例: 58" min="0" max="200">
+      </label>
+      <label class="fld">
+        <span>血清クレアチニン Cre（mg/dL）</span>
+        <input type="number" id="cre" inputmode="decimal" step="0.01" placeholder="例: 0.85" min="0" max="20">
+      </label>
+      <div id="crclResult"></div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="panel" id="p2">
+    <div class="card">
+      <h2>STEP 2 — 服用中の抗血栓薬</h2>
+      <p class="lead">該当する薬剤をすべて選択してください（複数選択可）。一般名／代表的商品名で表示しています。</p>
+      <div id="drugList"></div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="panel" id="p3">
+    <div class="card">
+      <h2>STEP 3 — 予定する処置・手術</h2>
+      <p class="lead">1つ選択してください。「消化器内視鏡」と「経皮的処置・手術」で休薬基準が異なります（内視鏡は継続可の薬剤が多く、経皮的処置はより厳格）。</p>
+      <div id="procList"></div>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="panel" id="p4">
+    <div id="resultArea"></div>
+  </section>
+</main>
+
+<div class="navbar">
+  <button class="btn ghost" id="backBtn" onclick="go(-1)" disabled>戻る</button>
+  <button class="btn" id="nextBtn" onclick="go(1)">次へ</button>
+</div>
+
+<script>
+/* ============ データ ============ */
+
+// 抗血栓薬マスタ（愛媛大DIニュース ver11.1 / 消化器内視鏡GL追補2017 準拠）
+// kind: aspirin / thieno / ticagrelor / cilostazol / apShort / epa / warfarin / doac
+const DRUGS = [
+  // 抗血小板薬
+  {id:'asa', cls:'抗血小板薬', g:'アスピリン', b:'バイアスピリン / バファリン配合錠 / タケルダ / キャブピリン', kind:'aspirin'},
+  {id:'clop', cls:'抗血小板薬', g:'クロピドグレル', b:'プラビックス / コンプラビン（配合）', kind:'thieno',
+    endoStop:'5〜7日間', surgStop:'7〜14日間（遅くとも5日前まで）'},
+  {id:'pras', cls:'抗血小板薬', g:'プラスグレル', b:'エフィエント', kind:'thieno',
+    endoStop:'5〜7日間（GL記載なし・チエノピリジンに準ずる）', surgStop:'14日間（遅くとも7日前まで）'},
+  {id:'ticl', cls:'抗血小板薬', g:'チクロピジン', b:'パナルジン', kind:'thieno',
+    endoStop:'5〜7日間', surgStop:'7〜14日間'},
+  {id:'tica', cls:'抗血小板薬', g:'チカグレロル', b:'ブリリンタ', kind:'ticagrelor',
+    endoStop:'5日（GL記載なし・添付文書に準ずる）', surgStop:'5日以上'},
+  {id:'cilo', cls:'抗血小板薬', g:'シロスタゾール', b:'プレタール', kind:'cilostazol',
+    surgStop:'3日間（遅くとも3日前まで）'},
+  {id:'sarp', cls:'抗血小板薬', g:'サルポグレラート', b:'アンプラーグ', kind:'apShort',
+    endoStop:'1日', surgStop:'1〜2日'},
+  {id:'epa', cls:'抗血小板薬', g:'EPA / EPA・DHA製剤', b:'エパデール / ロトリガ', kind:'epa',
+    surgStop:'7〜10日間'},
+  {id:'bera', cls:'抗血小板薬', g:'ベラプロスト', b:'ドルナー / プロサイリン / ケアロードLA', kind:'apShort',
+    endoStop:'1日', surgStop:'1日'},
+  {id:'lima', cls:'抗血小板薬', g:'リマプロスト', b:'プロレナール / オパルモン', kind:'apShort',
+    endoStop:'1日', surgStop:'1〜2日'},
+
+  // 抗凝固薬：ワルファリン
+  {id:'warf', cls:'抗凝固薬（ワルファリン）', g:'ワルファリン', b:'ワーファリン', kind:'warfarin'},
+
+  // 抗凝固薬：DOAC
+  {id:'dabi', cls:'抗凝固薬（DOAC）', g:'ダビガトラン', b:'プラザキサ', kind:'doac', doac:'dabi'},
+  {id:'riva', cls:'抗凝固薬（DOAC）', g:'リバーロキサバン', b:'イグザレルト', kind:'doac', doac:'riva'},
+  {id:'apix', cls:'抗凝固薬（DOAC）', g:'アピキサバン', b:'エリキュース', kind:'doac', doac:'apix'},
+  {id:'edox', cls:'抗凝固薬（DOAC）', g:'エドキサバン', b:'リクシアナ', kind:'doac', doac:'edox'},
+];
+
+// 処置マスタ  ctx: endo（消化器内視鏡）/ surg（経皮的処置・手術）
+// risk: low（青・低危険度）/ mid（黄・中等度）/ high（赤・高危険度）/ highest（濃赤・最高=ESD）
+// ※消化器内視鏡は頻度の高い検査・処置を上に配置
+const PROCS = [
+  // 消化器内視鏡（頻度順）
+  {id:'eod', ctx:'endo', risk:'low', n:'上下部消化管内視鏡検査（観察のみ・EUS観察）', note:''},
+  {id:'biopsy', ctx:'endo', risk:'low', n:'内視鏡的粘膜生検（EUS-FNAを除く）', note:''},
+  {id:'emr', ctx:'endo', risk:'high', n:'EMR・ポリペクトミー', note:''},
+  {id:'esd', ctx:'endo', risk:'highest', n:'ESD（内視鏡的粘膜下層剥離術）', note:'最高出血リスク。後出血はESD後24〜72hが最多。'},
+  {id:'ercp', ctx:'endo', risk:'low', n:'ERCP（造影のみ・切開手技なし）', note:''},
+  {id:'est', ctx:'endo', risk:'high', n:'EST（内視鏡的乳頭括約筋切開術）', note:'出血の多くは処置中〜24h以内。'},
+  {id:'fna', ctx:'endo', risk:'high', n:'EUS-FNA / EUS-FNB（超音波内視鏡下穿刺吸引）', note:''},
+  {id:'stent', ctx:'endo', risk:'mid', n:'消化管／胆管／膵管ステント留置（切開なし）', note:'経口摂取再開に合わせ服薬再開を確認。'},
+  {id:'epbd', ctx:'endo', risk:'mid', n:'内視鏡的乳頭バルーン拡張術（EPBD）', note:''},
+  {id:'evl', ctx:'endo', risk:'high', n:'内視鏡的食道・胃静脈瘤治療（EVL / EIS）', note:''},
+  {id:'dilat', ctx:'endo', risk:'high', n:'内視鏡的消化管拡張術', note:''},
+  {id:'peg', ctx:'endo', risk:'high', n:'経皮内視鏡的胃瘻造設術（PEG）', note:''},
+  {id:'ampul', ctx:'endo', risk:'high', n:'内視鏡的十二指腸乳頭切除術', note:''},
+  {id:'balloon', ctx:'endo', risk:'mid', n:'バルーン内視鏡', note:''},
+  {id:'marking', ctx:'endo', risk:'mid', n:'マーキング（クリップ・高周波・点墨など）', note:''},
+  {id:'cap', ctx:'endo', risk:'low', n:'カプセル内視鏡', note:''},
+  // 経皮的処置・手術
+  {id:'ascites', ctx:'surg', risk:'mid', n:'腹水穿刺（診断的・治療的）', note:'細針(22G以下)推奨。血小板≥5万・PT-INR≤1.5が目安。肝硬変例は個別評価。'},
+  {id:'liverbx', ctx:'surg', risk:'high', n:'経皮的肝生検', note:'血小板≥5万(可能なら10万)・PT-INR≤1.5(理想1.2以下)。'},
+  {id:'rfa', ctx:'surg', risk:'high', n:'経皮的RFA（肝ラジオ波焼灼）', note:'肝表面病変は出血リスク高。'},
+  {id:'ptcd', ctx:'surg', risk:'high', n:'経皮的PTCD・胆道ドレナージ', note:''},
+  {id:'eusbd', ctx:'surg', risk:'high', n:'EUS-BD / EUS下胆嚢ドレナージ', note:'穿刺＋拡張＋留置を伴う。経皮的肝生検に準じた厳密管理。'},
+];
+
+const RISK_LABEL = {low:'低危険度', mid:'中等度', high:'高危険度', highest:'最高（ESD）'};
+const RISK_CLASS = {low:'risk-low', mid:'risk-mid', high:'risk-high', highest:'risk-highest'};
+const CTX_LABEL = {endo:'消化器内視鏡', surg:'経皮的処置・手術'};
+
+/* ============ 状態 ============ */
+const state = {step:1, sex:null, age:null, weight:null, cre:null, crcl:null, drugs:[], proc:null};
+
+/* ============ STEP1: CrCl ============ */
+document.querySelectorAll('#sexSeg button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#sexSeg button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); state.sex=b.dataset.sex; calcCrCl();
+  };
+});
+['age','weight','cre'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', e=>{
+    state[id==='cre'?'cre':id] = parseFloat(e.target.value)||null;
+    calcCrCl();
+  });
+});
+function calcCrCl(){
+  const box=document.getElementById('crclResult');
+  const {sex,age,weight,cre}=state;
+  if(sex&&age>0&&weight>0&&cre>0){
+    let v=((140-age)*weight)/(72*cre);
+    if(sex==='female') v*=0.85;
+    state.crcl=Math.round(v);
+    let cat='', warn=false;
+    if(v>=80)cat='正常〜軽度低下';
+    else if(v>=50){cat='中等度低下';}
+    else if(v>=30){cat='高度低下'; warn=true;}
+    else {cat='重度低下（DOAC要注意）'; warn=true;}
+    box.innerHTML=`<div class="crcl-box ${warn?'warn':''}">
+      <div class="v">${state.crcl}<span class="u"> mL/min</span></div>
+      <div class="cat">CrCl ${cat}</div></div>`;
+  }else{
+    state.crcl=null; box.innerHTML='';
+  }
+}
+
+/* ============ STEP2: 薬剤リスト ============ */
+function buildDrugs(){
+  const wrap=document.getElementById('drugList');
+  let html='', lastCls='';
+  DRUGS.forEach(d=>{
+    if(d.cls!==lastCls){ html+=`<div class="grouphead">${d.cls}</div>`; lastCls=d.cls; }
+    const sel=state.drugs.includes(d.id);
+    html+=`<div class="opt ${sel?'sel':''}" data-drug="${d.id}">
+      <div class="chk">${sel?'✓':''}</div>
+      <div class="body"><div class="gname">${d.g}</div><div class="bname">${d.b}</div></div>
+    </div>`;
+  });
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('[data-drug]').forEach(el=>{
+    el.onclick=()=>{
+      const id=el.dataset.drug;
+      const i=state.drugs.indexOf(id);
+      if(i>=0)state.drugs.splice(i,1); else state.drugs.push(id);
+      buildDrugs(); updateNav();
+    };
+  });
+}
+
+/* ============ STEP3: 処置リスト ============ */
+function buildProcs(){
+  const wrap=document.getElementById('procList');
+  let html='', lastCtx='';
+  PROCS.forEach(p=>{
+    if(p.ctx!==lastCtx){ html+=`<div class="grouphead">${CTX_LABEL[p.ctx]}</div>`; lastCtx=p.ctx; }
+    const sel=state.proc===p.id;
+    html+=`<div class="opt ${sel?'sel':''}" data-proc="${p.id}">
+      <div class="chk">${sel?'✓':''}</div>
+      <div class="body"><div class="gname">${p.n}</div></div>
+      <div class="tag ${RISK_CLASS[p.risk]}">${RISK_LABEL[p.risk]}</div>
+    </div>`;
+  });
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('[data-proc]').forEach(el=>{
+    el.onclick=()=>{ state.proc=el.dataset.proc; buildProcs(); updateNav(); };
+  });
+}
+
+/* ============ 薬剤別 管理プラン算出 ============ */
+// 返り値 v: 'continue'（継続可）/ 'brief'（短期・当日休薬）/ 'stop'（要休薬）
+function makePlan(d, proc, crcl, apCount){
+  const endo = (proc.ctx==='endo');
+  const lowRisk = (proc.risk==='low' || proc.risk==='mid');
+
+  // ---- 出血低危険度・中等度（観察・生検・ステント・EPBD・腹水穿刺など）→ 原則継続 ----
+  if(lowRisk){
+    if(d.kind==='warfarin')
+      return {v:'continue', stop:'治療域内（PT-INR ≤3.0）を確認のうえ継続', resume:'—', note:''};
+    if(d.kind==='doac')
+      return {v:'continue', stop:'休薬なし（継続）。処置当日の内服ピーク時間を避ける', resume:'—', note:''};
+    return {v:'continue', stop:'休薬なし（継続）', resume:'—',
+      note: proc.id==='ascites' ? '血小板≥5万・PT-INR≤1.5が目安。著明な凝固異常時はFFP/血小板補正を検討。' : ''};
+  }
+
+  // ---- 出血高危険度・最高 ----
+  // アスピリン：原則継続
+  if(d.kind==='aspirin'){
+    if(endo){
+      return {v:'continue',
+        stop: apCount>=2 ? '休薬なし（DAPTでもアスピリンは継続が原則）' : '休薬なし（継続）',
+        resume:'—',
+        note:'低用量アスピリン単剤は出血高危険度内視鏡でも継続が原則。血栓塞栓症リスクが低い場合のみ3〜5日休薬を考慮。'};
+    }
+    return {v:'continue',
+      stop:'原則継続（出血リスクの高い大手術では7〜14日休薬を考慮）',
+      resume:'休薬した場合は翌日〜',
+      note:'体表小手術・抜歯・出血対応が容易な処置は継続が推奨。経皮的処置で休薬する場合も血栓リスクを評価。'};
+  }
+  // チエノピリジン系
+  if(d.kind==='thieno'){
+    return {v:'stop', stop: endo?d.endoStop:d.surgStop, resume:'翌日〜（必要に応じ負荷投与）',
+      note:'血栓塞栓症リスクが高い場合・DAPTの場合はアスピリンまたはシロスタゾールへの置換を検討。'};
+  }
+  if(d.kind==='ticagrelor'){
+    return {v:'stop', stop: endo?d.endoStop:d.surgStop, resume:'翌日〜', note:'可逆的P2Y12阻害。'};
+  }
+  if(d.kind==='cilostazol'){
+    if(endo) return {v:'continue', stop:'休薬なし（継続）。血栓リスクが低い場合は1日休薬', resume:'—',
+      note:'半減期が短く、DAPTを絞る際の代替（置換）薬として有用。'};
+    return {v:'stop', stop:d.surgStop, resume:'翌日〜', note:''};
+  }
+  if(d.kind==='epa'){
+    if(endo) return {v:'brief', stop:'1日休薬（リスクに応じ休薬なしも可）', resume:'翌日〜', note:''};
+    return {v:'stop', stop:d.surgStop, resume:'翌日〜', note:'不可逆的にTXA₂を抑制。'};
+  }
+  if(d.kind==='apShort'){
+    return {v:'brief', stop: endo?d.endoStop:d.surgStop, resume:'翌日〜', note:''};
+  }
+  // ワルファリン
+  if(d.kind==='warfarin'){
+    if(endo){
+      return {v:'continue', stop:'治療域内（PT-INR ≤3.0）を確認のうえ継続可', resume:'—', bridge:true,
+        note:'追補2017では治療域内ワルファリンの継続を推奨。血栓リスクや術者判断によりヘパリン置換または一時的DOAC変更も選択肢。'};
+    }
+    return {v:'stop', stop:'3〜5日前から休薬（PT-INR<1.5を確認）', resume:'止血確認後、術後48時間以内', bridge:true,
+      note:'血栓低リスク：単純休薬。血栓高リスク（機械弁・CHADS₂5-6等）：ヘパリン置換。'};
+  }
+  // DOAC
+  if(d.kind==='doac') return doacPlan(d.doac, proc, crcl);
+}
+
+/* ---- DOAC 休薬（腎機能依存） ---- */
+function doacPlan(k, proc, crcl){
+  const endo = (proc.ctx==='endo');
+  // 消化器内視鏡（高危険度）：追補2017 → 当日朝休薬・翌朝再開
+  if(endo){
+    let stop='前日夜まで継続し、処置当日朝から休薬', note='追補2017：処置当日朝から休薬し、翌朝から再開。', v='brief';
+    if(k==='dabi' && crcl!=null && crcl<50){
+      stop='前日から休薬（CrCl<50のダビガトランは半減期延長のため前倒し）';
+      note='追補2017は当日朝休薬が原則だが、CrCl低下例では休薬を前倒し。';
+    }
+    return {v, stop, resume:'翌朝から再開（後出血懸念時は延期）', note};
+  }
+  // 経皮的処置・手術（出血中〜高リスク）：腎機能依存で前休薬を延長
+  let stop, note, resume='止血確認後 6〜8時間以降（出血懸念時は24〜48h）';
+  if(k==='dabi'){
+    // ダビガトランは約80%が腎排泄 → 最も腎機能依存
+    note='ダビガトランは約80%が腎排泄。腎機能低下で半減期が大きく延長。ヘパリン置換は不要。';
+    if(crcl==null) stop='CrCl依存：≥50→48時間(2日)以上 / 30〜49→72〜96時間(3〜4日)以上';
+    else if(crcl>=50) stop='48時間（2日）以上前';
+    else if(crcl>=30) stop='72〜96時間（3〜4日）以上前';
+    else { stop='禁忌（CrCl<30）'; note='CrCl<30はダビガトラン禁忌。循環器内科と相談。'; }
+  } else {
+    // Xa阻害薬（リバ35%・エド50%・アピ27%が腎排泄）→ ダビガトランより依存は軽度だが高度低下で延長
+    note='Xa阻害薬（アピ/リバ/エド）も腎排泄寄与があり、高度腎機能低下例では休薬を延長。ヘパリン置換は不要。';
+    if(crcl==null) stop='48時間以上前（CrCl<30では72時間以上に延長を検討）';
+    else if(crcl>=30) stop='48時間（2日）以上前';
+    else if(crcl>=15) stop='72時間（3日）以上前（CrCl 15〜29：腎機能低下のため延長）';
+    else { stop='使用は推奨されない（CrCl<15）'; note='高度腎不全ではXa阻害薬の使用自体を再評価。専門科と相談。'; }
+  }
+  return {v:'stop', stop, resume, note};
+}
+
+/* ============ STEP4: 判定 ============ */
+function buildResult(){
+  const area=document.getElementById('resultArea');
+  const proc=PROCS.find(p=>p.id===state.proc);
+  const risk=proc.risk;
+  const highRisk = (risk==='high'||risk==='highest');
+
+  // サマリー
+  let html=`<div class="card">
+    <span class="pill ${RISK_CLASS[risk]}">${RISK_LABEL[risk]}</span>
+    <span class="pill" style="background:#eef1f6;color:#5b6678">${CTX_LABEL[proc.ctx]}</span>
+    <h2>${proc.n}</h2>
+    <div class="summary">
+      <div>CrCl: <b>${state.crcl!=null?state.crcl+' mL/min':'未算出'}</b></div>
+      <div>選択薬剤: <b>${state.drugs.length}剤</b></div>
+    </div>`;
+  if(proc.note) html+=`<div class="res note" style="margin:0">📌 ${proc.note}</div>`;
+  html+=`</div>`;
+
+  // 最高リスク警告
+  if(risk==='highest'){
+    html+=`<div class="alert amber">⚠️ <b>ESDは最高出血リスク。</b>抗血小板薬2剤(DAPT)は可能なら休薬完了までESD延期が望ましい。延期困難ならアスピリンまたはシロスタゾール単剤に絞る。ワルファリンはヘパリン置換中のESDで後出血40〜50%との報告あり、NVAFではDOACへの一時変更も検討。</div>`;
+  }
+
+  // DAPT警告
+  const apCount = state.drugs.filter(id=>{const d=DRUGS.find(x=>x.id===id);return d&&d.cls==='抗血小板薬';}).length;
+  if(apCount>=2 && highRisk){
+    html+=`<div class="alert">🩸 <b>抗血小板薬 ${apCount}剤併用（DAPT）。</b>ステント留置後など血栓高リスクの可能性。中断前に必ず循環器内科と相談し、可能な限り単剤化・処置延期を検討。</div>`;
+  }
+
+  // 血栓リスク注意（抗凝固薬選択時）
+  const hasWarf = state.drugs.includes('warf');
+  const hasDoac = state.drugs.some(id=>DRUGS.find(x=>x.id===id).doac);
+  if((hasWarf||hasDoac) && highRisk){
+    html+=`<div class="alert">🧠 <b>休薬前に血栓塞栓症リスクの評価を。</b>機械弁置換後・3か月以内の脳梗塞/TIA・肺塞栓発症3か月以内・DES留置12か月以内などは<b>最高血栓リスク</b>。原則休薬せず、循環器内科／脳神経内科と必ず事前相談。</div>`;
+  }
+
+  if(state.drugs.length===0){
+    html+=`<div class="empty">薬剤が選択されていません。STEP2に戻って選択してください。</div>`;
+  }
+
+  // 各薬剤カード
+  const VMETA = {
+    continue:{cls:'cont',  vcls:'c', label:'✓ 継続可',     klabel:'管理'},
+    brief:   {cls:'brief', vcls:'b', label:'◑ 短期休薬',   klabel:'休薬期間'},
+    stop:    {cls:'stop',  vcls:'s', label:'■ 要休薬',     klabel:'休薬期間'}
+  };
+  state.drugs.forEach(id=>{
+    const d=DRUGS.find(x=>x.id===id);
+    const plan=makePlan(d, proc, state.crcl, apCount);
+    const m=VMETA[plan.v];
+
+    html+=`<div class="res ${m.cls}">
+      <div class="rh">
+        <div><span class="rname">${d.g}</span> <span class="rbrand">${d.b}</span></div>
+        <div class="verdict ${m.vcls}">${m.label}</div>
+      </div>`;
+    html+=`<div class="row"><div class="k">${m.klabel}</div><div class="v"><b>${plan.stop}</b></div></div>`;
+    if(plan.resume && plan.resume!=='—')
+      html+=`<div class="row"><div class="k">再開時期</div><div class="v">${plan.resume}</div></div>`;
+    if(plan.bridge){
+      html+=`<div class="bridge">🔄 <b>ヘパリン置換：血栓高リスク時に推奨。</b>休薬しINR<2.0でヘパリン開始→術前4〜6hで中止→止血後12〜24hで再開→INR>1.6でヘパリン中止。<u>DOAC服用者では置換は推奨されない。</u></div>`;
+    }
+    if(plan.note) html+=`<div class="note">${plan.note}</div>`;
+    html+=`</div>`;
+  });
+
+  // 緊急時中和
+  if(state.drugs.length){
+    html+=`<details class="ref"><summary>⚡ 緊急処置時の中和・拮抗</summary>
+      ・ワルファリン：ビタミンK / FFP / 4F-PCC（ケイセントラ®）<br>
+      ・ダビガトラン：イダルシズマブ（プリズバインド®）で完全中和<br>
+      ・Xa阻害薬（アピ/リバ/エド）：PCC（アンデキサネットαは国内未承認）<br>
+      ・抗血小板薬：血小板輸血（重大出血時）</details>`;
+  }
+
+  html+=`<button class="restart" onclick="restart()">↺ 最初からやり直す</button>
+    <p class="disclaimer">本ツールは臨床判断の補助です。休薬期間はあくまで「目安」であり、最終的な休薬・再開の決定は患者個別の出血／血栓リスクを評価のうえ主治医が行ってください。<br>準拠：愛媛大学医学部附属病院 DIニュース ver11.1（2021/8）、抗血栓薬服用者に対する消化器内視鏡診療GL(2012)＋DOAC追補2017、JCSフォーカスアップデート(2020)、JCS2022。</p>`;
+
+  area.innerHTML=html;
+}
+
+/* ============ ナビゲーション ============ */
+function showStep(n){
+  state.step=n;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+n).classList.add('active');
+  document.querySelectorAll('#stepsBar .s').forEach(s=>{
+    const v=+s.dataset.s;
+    s.classList.toggle('active', v===n);
+    s.classList.toggle('done', v<n);
+  });
+  if(n===2) buildDrugs();
+  if(n===3) buildProcs();
+  if(n===4) buildResult();
+  document.getElementById('backBtn').disabled = (n===1);
+  const nb=document.getElementById('nextBtn');
+  nb.textContent = (n===3)?'判定する':(n===4?'完了':'次へ');
+  nb.style.display = (n===4)?'none':'';
+  updateNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateNav(){
+  const nb=document.getElementById('nextBtn');
+  if(state.step===2) nb.disabled = state.drugs.length===0;
+  else if(state.step===3) nb.disabled = !state.proc;
+  else nb.disabled=false;
+}
+function go(dir){
+  let n=state.step+dir;
+  if(n<1)n=1; if(n>4)n=4;
+  showStep(n);
+}
+function restart(){
+  state.step=1; state.sex=null; state.age=null; state.weight=null; state.cre=null;
+  state.crcl=null; state.drugs=[]; state.proc=null;
+  document.getElementById('age').value='';
+  document.getElementById('weight').value='';
+  document.getElementById('cre').value='';
+  document.querySelectorAll('#sexSeg button').forEach(x=>x.classList.remove('on'));
+  document.getElementById('crclResult').innerHTML='';
+  document.getElementById('nextBtn').style.display='';
+  showStep(1);
+}
+showStep(1);
+</script>
+</body>
+</html>

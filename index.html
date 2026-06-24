@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0f766e">
+<title>診療ツール ホーム</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#f5f7f8; --card:#ffffff; --ink:#1b2a2e; --sub:#5c7077;
+    --accent:#0f766e; --accent2:#14b8a6; --line:#e3eaeb; --shadow:rgba(15,118,110,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0e1516; --card:#16201f; --ink:#e8f1ef; --sub:#9bb1ad;
+      --accent:#2dd4bf; --accent2:#0f766e; --line:#22302e; --shadow:rgba(0,0,0,.4); }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:-apple-system,"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+    background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  header{
+    max-width:880px; margin:0 auto; padding:32px 20px 8px;
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{
+    width:42px; height:42px; border-radius:12px; flex:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid; place-items:center; color:#fff; font-weight:700; font-size:20px;
+    box-shadow:0 4px 14px var(--shadow);
+  }
+  h1{font-size:1.35rem; margin:0; letter-spacing:.02em}
+  .tag{color:var(--sub); font-size:.85rem; margin:2px 0 0}
+  .search{
+    max-width:880px; margin:18px auto 0; padding:0 20px;
+  }
+  .search input{
+    width:100%; padding:13px 16px; border-radius:12px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); font-size:1rem; outline:none;
+    box-shadow:0 1px 3px var(--shadow);
+  }
+  .search input:focus{border-color:var(--accent)}
+  main{max-width:880px; margin:0 auto; padding:18px 20px 60px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px}
+  a.card{
+    display:block; text-decoration:none; color:inherit; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; padding:18px;
+    box-shadow:0 2px 10px var(--shadow); transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  a.card:hover{transform:translateY(-3px); box-shadow:0 8px 22px var(--shadow); border-color:var(--accent)}
+  a.card:active{transform:translateY(-1px)}
+  .ic{font-size:1.8rem; line-height:1; margin-bottom:10px}
+  .ct{font-weight:700; font-size:1.02rem; margin:0 0 6px}
+  .cd{color:var(--sub); font-size:.86rem; margin:0; line-height:1.5}
+  .empty{color:var(--sub); text-align:center; padding:40px 0; display:none}
+  footer{max-width:880px; margin:0 auto; padding:0 20px 40px; color:var(--sub); font-size:.78rem; line-height:1.7}
+  .pill{display:inline-block; background:var(--line); color:var(--sub); border-radius:999px; padding:2px 10px; font-size:.72rem; margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">医</div>
+    <div>
+      <h1>診療ツール ホーム</h1>
+      <p class="tag">オフライン対応・院内用ツール集</p>
+    </div>
+  </div>
+</header>
+
+<div class="search">
+  <input id="q" type="search" placeholder="ツールを検索…（例：加算 / γ / 抗血栓 / 肝）" autocomplete="off">
+</div>
+
+<main>
+  <div class="grid" id="grid">
+    <a class="card" href="2026%E8%A8%BA%E7%99%82%E5%A0%B1%E9%85%AC%E6%94%B9%E5%AE%9A%20%E6%B6%88%E5%8C%96%E5%99%A8%E5%86%85%E7%A7%91%20%E5%8A%A0%E7%AE%97%E8%A8%88%E7%AE%97%E3%83%84%E3%83%BC%E3%83%AB.html" data-k="加算 計算 診療報酬 2026 消化器">
+      <div class="ic">🧮</div>
+      <p class="ct">2026診療報酬 加算計算</p>
+      <p class="cd">令和8年度改定 消化器内科の加算をチェック式で計算</p>
+    </a>
+    <a class="card" href="catecholamine-calc.html" data-k="カテコラミン γ ガンマ 計算 昇圧 ドパミン ドブタミン">
+      <div class="ic">💉</div>
+      <p class="ct">カテコラミン γ計算</p>
+      <p class="cd">体重・投与量からγ（μg/kg/min）を即時計算</p>
+    </a>
+    <a class="card" href="%E6%8A%97%E8%A1%80%E6%A0%93%E8%96%AC%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89.html" data-k="抗血栓薬 休薬 管理 ワーファリン DOAC 抗血小板 内視鏡 手術">
+      <div class="ic">🩸</div>
+      <p class="ct">抗血栓薬 休薬管理ガイド</p>
+      <p class="cd">処置・手術前の抗血栓薬の休薬／継続を判断</p>
+    </a>
+    <a class="card" href="%E8%82%9D%E7%96%BE%E6%82%A3%E3%83%95%E3%82%A9%E3%83%AD%E3%83%BC%E3%82%A2%E3%83%97%E3%83%AA.html" data-k="肝 脂肪肝 B型 C型 肝炎 フォロー MASLD 肝硬変">
+      <div class="ic">🫀</div>
+      <p class="ct">肝疾患フォローアプリ</p>
+      <p class="cd">脂肪肝・B/C型肝炎のフォロー間隔と検査を管理</p>
+    </a>
+  </div>
+  <p class="empty" id="empty">該当するツールがありません</p>
+</main>
+
+<footer>
+  <div class="pill">📵 ネット接続不要</div>
+  <p>このページはローカルで動作します。スマホで使うときは、このフォルダをスマホに入れて <code>index.html</code> を開くか、ホーム画面に追加してください。<br>
+  ※ 問診ツール（PowerShell版）はブラウザでは動きません。Windowsで <code>問診ツール起動.bat</code> をご利用ください。</p>
+</footer>
+
+<script>
+  // 検索フィルタ
+  const q = document.getElementById('q');
+  const cards = [...document.querySelectorAll('.card')];
+  const empty = document.getElementById('empty');
+  q.addEventListener('input', () => {
+    const v = q.value.trim().toLowerCase();
+    let shown = 0;
+    cards.forEach(c => {
+      const hit = !v || (c.textContent + ' ' + c.dataset.k).toLowerCase().includes(v);
+      c.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    empty.style.display = shown ? 'none' : 'block';
+  });
+
+  // PWA: サーバー(https/localhost)上でのみ Service Worker を登録（file:// では何もしない）
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+</script>
+</body>
+</html>

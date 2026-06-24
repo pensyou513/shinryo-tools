@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>カテコラミン γ計算</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 28px 18px 48px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0; }
+  .subtitle { color: #94a3b8; font-size: 13px; margin: 4px 0 12px; }
+  .section-label { color: #cbd5e1; font-size: 13px; font-weight: 600; margin: 18px 0 8px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 14px; border-radius: 20px; background: #1e293b;
+    border: 1px solid #334155; color: #cbd5e1; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: .12s;
+  }
+  .chip:hover { border-color: #475569; }
+  .chip.selected { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .drug-en { color: #64748b; font-size: 12px; margin-top: 6px; }
+  .card { background: #1e293b; border-radius: 14px; padding: 16px; margin-top: 10px; }
+  .row { display: flex; align-items: flex-end; gap: 10px; }
+  .field { flex: 1; }
+  .field-label { color: #94a3b8; font-size: 12px; margin-bottom: 6px; display: block; }
+  .prep-label { margin-top: 14px; }
+  input[type="number"] {
+    width: 100%; background: #0f172a; border-radius: 10px; padding: 12px 14px;
+    color: #f8fafc; font-size: 18px; font-weight: 600; border: 1px solid #334155;
+    outline: none;
+  }
+  input[type="number"]:focus { border-color: #3b82f6; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .inline-input { display: flex; align-items: center; }
+  .unit { color: #94a3b8; font-size: 14px; margin-left: 8px; }
+  .slash { color: #64748b; font-size: 20px; padding-bottom: 10px; }
+  .conc-text { color: #38bdf8; font-size: 13px; margin-top: 12px; font-weight: 600; }
+  .toggle-row { display: flex; background: #1e293b; border-radius: 12px; padding: 4px; gap: 4px; }
+  .toggle {
+    flex: 1; padding: 10px 0; border-radius: 9px; text-align: center; cursor: pointer;
+    color: #94a3b8; font-size: 14px; font-weight: 600; transition: .12s; border: none; background: transparent;
+    font-family: inherit;
+  }
+  .toggle.on { background: #2563eb; color: #fff; }
+  .result-card { background: #1e3a8a; border-radius: 16px; padding: 18px; margin-top: 12px; border: 1px solid #3b82f6; }
+  .result-row { display: flex; align-items: center; }
+  .result-item { flex: 1; text-align: center; }
+  .result-divider { width: 1px; height: 50px; background: #3b82f6; }
+  .result-label { color: #bfdbfe; font-size: 12px; margin-bottom: 4px; }
+  .result-value { color: #fff; font-size: 30px; font-weight: 800; line-height: 1.1; }
+  .result-unit { color: #bfdbfe; font-size: 12px; margin-top: 2px; }
+  .typical-text { color: #dbeafe; font-size: 13px; margin-top: 14px; text-align: center; }
+  .in-range { color: #86efac; font-weight: 700; }
+  .out-range { color: #fca5a5; font-weight: 700; }
+  .range-card { background: #1e293b; border-radius: 12px; padding: 14px; margin-bottom: 8px; border: 1px solid #334155; }
+  .range-card.active { border-color: #22c55e; background: #14271c; }
+  .range-header { display: flex; align-items: center; justify-content: space-between; }
+  .range-dose { color: #f1f5f9; font-size: 16px; font-weight: 700; }
+  .range-card.active .range-dose { color: #86efac; }
+  .range-badge {
+    color: #94a3b8; font-size: 12px; font-weight: 600; background: #0f172a;
+    padding: 3px 10px; border-radius: 10px;
+  }
+  .range-card.active .range-badge { color: #052e16; background: #86efac; }
+  .range-effect { color: #cbd5e1; font-size: 13px; margin-top: 8px; line-height: 1.5; }
+  .range-card.active .range-effect { color: #dcfce7; }
+  .range-now { color: #22c55e; font-size: 12px; font-weight: 700; margin-top: 8px; }
+  .note-card { background: #1e293b; border-radius: 12px; padding: 14px; margin-top: 8px; }
+  .note-text { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+  .disclaimer { color: #64748b; font-size: 11px; line-height: 1.55; margin-top: 20px; }
+  .formula { color: #475569; font-size: 12px; margin-top: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>カテコラミン γ計算</h1>
+  <div class="subtitle">投与量と効能の個別計算ツール</div>
+
+  <div class="section-label">薬剤</div>
+  <div class="chip-row" id="chipRow"></div>
+  <div class="drug-en" id="drugEn"></div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label class="field-label">体重 (kg)</label>
+        <input type="number" id="weight" value="60" inputmode="decimal" />
+      </div>
+    </div>
+    <label class="field-label prep-label">希釈（薬剤量 / 総液量）</label>
+    <div class="row">
+      <div class="field">
+        <div class="inline-input">
+          <input type="number" id="amountMg" inputmode="decimal" />
+          <span class="unit">mg</span>
+        </div>
+      </div>
+      <span class="slash">/</span>
+      <div class="field">
+        <div class="inline-input">
+          <input type="number" id="volumeMl" inputmode="decimal" />
+          <span class="unit">mL</span>
+        </div>
+      </div>
+    </div>
+    <div class="conc-text" id="concText"></div>
+  </div>
+
+  <div class="section-label">計算方向</div>
+  <div class="toggle-row">
+    <button class="toggle on" id="modeGamma">γ → 流量</button>
+    <button class="toggle" id="modeRate">流量 → γ</button>
+  </div>
+
+  <div class="card">
+    <div class="field" id="gammaField">
+      <label class="field-label">目標投与量 γ (mcg/kg/min)</label>
+      <input type="number" id="gammaInput" value="0.1" inputmode="decimal" />
+    </div>
+    <div class="field" id="rateField" style="display:none">
+      <label class="field-label">現在の流量 (mL/h)</label>
+      <input type="number" id="rateInput" value="5" inputmode="decimal" />
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-row">
+      <div class="result-item">
+        <div class="result-label">流量</div>
+        <div class="result-value" id="outRate">–</div>
+        <div class="result-unit">mL/h</div>
+      </div>
+      <div class="result-divider"></div>
+      <div class="result-item">
+        <div class="result-label">投与量 γ</div>
+        <div class="result-value" id="outGamma">–</div>
+        <div class="result-unit">mcg/kg/min</div>
+      </div>
+    </div>
+    <div class="typical-text" id="typicalText"></div>
+  </div>
+
+  <div class="section-label">用量域と効能</div>
+  <div id="ranges"></div>
+
+  <div class="note-card"><div class="note-text" id="noteText"></div></div>
+
+  <div class="disclaimer">
+    ※ 本アプリは学習・確認補助を目的とした参考ツールです。表示される用量域・効能は
+    一般的な代表値であり、実際の投与は患者状態・施設プロトコル・最新ガイドラインに
+    基づき医師の責任で判断してください。計算結果は必ずダブルチェックしてください。
+  </div>
+  <div class="formula">流量(mL/h) = γ × 体重(kg) × 60 ÷ 濃度(mcg/mL)</div>
+</div>
+
+<script>
+// ===== 薬剤データ（用量域・効能は一般的な代表値） =====
+const DRUGS = [
+  {
+    id: 'noradrenaline', name: 'ノルアドレナリン', nameEn: 'Noradrenaline (Norepinephrine)',
+    defaultPrep: { amountMg: 5, volumeMl: 50 }, typical: { min: 0.05, max: 0.3 },
+    doseRanges: [
+      { min: 0.01, max: 0.1, label: '低用量', effect: 'α1作用主体。軽度〜中等度の血管収縮で血圧を上昇させる。' },
+      { min: 0.1, max: 0.3, label: '維持域', effect: '強い末梢血管収縮（α1）＋軽度の陽性変力作用（β1）。敗血症性ショック等の標準維持域。' },
+      { min: 0.3, max: null, label: '高用量', effect: '難治性ショック域。末梢虚血・不整脈・臓器灌流低下に注意。' },
+    ],
+    note: '第一選択の昇圧薬。中心静脈ルートからの投与が原則。',
+  },
+  {
+    id: 'adrenaline', name: 'アドレナリン', nameEn: 'Adrenaline (Epinephrine)',
+    defaultPrep: { amountMg: 3, volumeMl: 50 }, typical: { min: 0.01, max: 0.3 },
+    doseRanges: [
+      { min: 0.01, max: 0.05, label: '低用量', effect: 'β作用優位。心収縮力・心拍出量増加、気管支拡張。' },
+      { min: 0.05, max: 0.2, label: '中用量', effect: 'α・β混合作用。強心＋血管収縮。' },
+      { min: 0.2, max: null, label: '高用量', effect: 'α作用優位。強い血管収縮。頻脈・乳酸上昇・不整脈に注意。' },
+    ],
+    note: 'アナフィラキシー・心停止時は別プロトコル（ボーラス投与）。',
+  },
+  {
+    id: 'dopamine', name: 'ドパミン', nameEn: 'Dopamine',
+    defaultPrep: { amountMg: 150, volumeMl: 50 }, typical: { min: 3, max: 10 },
+    doseRanges: [
+      { min: 1, max: 3, label: '低用量', effect: 'ドパミン受容体刺激。腎・腸間膜血管拡張（いわゆる腎保護効果は否定的）。' },
+      { min: 3, max: 10, label: '中用量', effect: 'β1作用。心収縮力・心拍出量・心拍数の増加。' },
+      { min: 10, max: null, label: '高用量', effect: 'α作用。末梢血管収縮で血圧上昇。頻脈・不整脈に注意。' },
+    ],
+    note: '用量依存性に作用が変化する。頻脈性不整脈に注意。',
+  },
+  {
+    id: 'dobutamine', name: 'ドブタミン', nameEn: 'Dobutamine',
+    defaultPrep: { amountMg: 150, volumeMl: 50 }, typical: { min: 2, max: 10 },
+    doseRanges: [
+      { min: 2, max: 5, label: '低〜中用量', effect: 'β1作用主体。心収縮力・心拍出量を増加（強心）。' },
+      { min: 5, max: 15, label: '中〜高用量', effect: 'β1＋軽度β2。強心作用に加え末梢血管拡張。' },
+      { min: 15, max: 20, label: '高用量', effect: '頻脈・不整脈・心筋酸素消費増加に注意。' },
+    ],
+    note: '主に強心目的。末梢血管抵抗を下げるため低血圧では昇圧薬と併用。',
+  },
+  {
+    id: 'isoproterenol', name: 'イソプレナリン', nameEn: 'Isoproterenol (プロタノール)',
+    defaultPrep: { amountMg: 1, volumeMl: 50 }, typical: { min: 0.01, max: 0.2 },
+    doseRanges: [
+      { min: 0.01, max: 0.05, label: '低用量', effect: 'β1/β2作用。心拍数増加。徐脈・房室ブロックに使用。' },
+      { min: 0.05, max: 0.3, label: '中〜高用量', effect: '強い陽性変時作用。頻脈性不整脈・心筋虚血に注意。' },
+    ],
+    note: '純粋なβ刺激薬。心拍数を上げたい徐脈・トルサードに。',
+  },
+];
+
+// ===== 計算ロジック =====
+const concentrationMcgPerMl = (mg, ml) => (!ml ? 0 : (mg * 1000) / ml);
+const gammaToRate = (g, w, mg, ml) => { const c = concentrationMcgPerMl(mg, ml); return !c ? 0 : (g * w * 60) / c; };
+const rateToGamma = (r, w, mg, ml) => (!w ? 0 : (r * concentrationMcgPerMl(mg, ml)) / (w * 60));
+function findDoseRange(drug, g) {
+  for (const r of drug.doseRanges) {
+    const upperOk = r.max === null ? true : g < r.max;
+    if (g >= r.min && upperOk) return r;
+  }
+  return null;
+}
+function fmt(n, digits = 2) {
+  if (!isFinite(n) || isNaN(n)) return '–';
+  return n.toLocaleString('ja-JP', { minimumFractionDigits: 0, maximumFractionDigits: digits });
+}
+
+// ===== 状態 =====
+let drugId = DRUGS[0].id;
+let mode = 'gamma';
+
+const $ = (id) => document.getElementById(id);
+const drug = () => DRUGS.find((d) => d.id === drugId) || DRUGS[0];
+
+function renderChips() {
+  const row = $('chipRow');
+  row.innerHTML = '';
+  DRUGS.forEach((d) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (d.id === drugId ? ' selected' : '');
+    b.textContent = d.name;
+    b.onclick = () => selectDrug(d);
+    row.appendChild(b);
+  });
+}
+
+function selectDrug(d) {
+  drugId = d.id;
+  $('amountMg').value = d.defaultPrep.amountMg;
+  $('volumeMl').value = d.defaultPrep.volumeMl;
+  $('gammaInput').value = d.typical.min;
+  renderChips();
+  update();
+}
+
+function setMode(m) {
+  mode = m;
+  $('modeGamma').classList.toggle('on', m === 'gamma');
+  $('modeRate').classList.toggle('on', m === 'rate');
+  $('gammaField').style.display = m === 'gamma' ? '' : 'none';
+  $('rateField').style.display = m === 'rate' ? '' : 'none';
+  update();
+}
+
+function update() {
+  const d = drug();
+  const w = parseFloat($('weight').value) || 0;
+  const mg = parseFloat($('amountMg').value) || 0;
+  const ml = parseFloat($('volumeMl').value) || 0;
+  const conc = concentrationMcgPerMl(mg, ml);
+
+  const gammaVal = parseFloat($('gammaInput').value) || 0;
+  const rateVal = parseFloat($('rateInput').value) || 0;
+
+  const computedRate = mode === 'gamma' ? gammaToRate(gammaVal, w, mg, ml) : rateVal;
+  const computedGamma = mode === 'gamma' ? gammaVal : rateToGamma(rateVal, w, mg, ml);
+
+  $('drugEn').textContent = d.nameEn;
+  $('concText').textContent = `濃度 = ${fmt(conc, 1)} mcg/mL（${fmt(conc / 1000, 3)} mg/mL）`;
+  $('outRate').textContent = fmt(computedRate, 2);
+  $('outGamma').textContent = fmt(computedGamma, 3);
+
+  const inTypical = computedGamma >= d.typical.min && computedGamma <= d.typical.max;
+  $('typicalText').innerHTML =
+    `維持域の目安: ${d.typical.min}–${d.typical.max} γ&nbsp;&nbsp;` +
+    `<span class="${inTypical ? 'in-range' : 'out-range'}">${inTypical ? '✓ 範囲内' : '⚠ 範囲外'}</span>`;
+
+  const active = findDoseRange(d, computedGamma);
+  const ranges = $('ranges');
+  ranges.innerHTML = '';
+  d.doseRanges.forEach((r) => {
+    const isActive = r === active;
+    const upper = r.max === null ? '〜' : `〜${r.max}`;
+    const card = document.createElement('div');
+    card.className = 'range-card' + (isActive ? ' active' : '');
+    card.innerHTML =
+      `<div class="range-header"><span class="range-dose">${r.min}${upper} γ</span>` +
+      `<span class="range-badge">${r.label}</span></div>` +
+      `<div class="range-effect">${r.effect}</div>` +
+      (isActive ? `<div class="range-now">← 現在の設定はこの域</div>` : '');
+    ranges.appendChild(card);
+  });
+
+  $('noteText').textContent = '📌 ' + d.note;
+}
+
+// ===== 初期化 =====
+$('modeGamma').onclick = () => setMode('gamma');
+$('modeRate').onclick = () => setMode('rate');
+['weight', 'amountMg', 'volumeMl', 'gammaInput', 'rateInput'].forEach((id) => {
+  $(id).addEventListener('input', update);
+});
+$('amountMg').value = DRUGS[0].defaultPrep.amountMg;
+$('volumeMl').value = DRUGS[0].defaultPrep.volumeMl;
+renderChips();
+update();
+</script>
+</body>
+</html>
