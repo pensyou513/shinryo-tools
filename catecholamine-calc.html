@@ -215,7 +215,7 @@ const DRUGS = [
     id: 'carperitide', name: 'ハンプ', nameEn: 'Carperitide (カルペリチド / hANP)',
     // 1V = 1000μg。希釈欄はバイアル表記に合わせて mcg で入力する（defaultPrep は mg 換算）
     amountUnit: 'mcg', gammaDigits: 4,
-    defaultPrep: { amountMg: 1, volumeMl: 50 }, typical: { min: 0.0125, max: 0.2 },
+    defaultPrep: { amountMg: 1, volumeMl: 100 }, typical: { min: 0.0125, max: 0.2 },
     doseRanges: [
       { min: 0.0125, max: 0.05, label: '低用量', effect: '本邦で多い開始量。血圧低下を避けつつ、血管拡張（前・後負荷軽減）とナトリウム利尿を期待する。' },
       { min: 0.05, max: 0.1, label: '中用量', effect: '血管拡張・利尿作用が強まる。血圧・心拍数・尿量をみながら漸増する。' },
