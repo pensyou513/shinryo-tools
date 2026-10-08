@@ -97,8 +97,8 @@
     <div class="row">
       <div class="field">
         <div class="inline-input">
-          <input type="number" id="amountMg" inputmode="decimal" />
-          <span class="unit">mg</span>
+          <input type="number" id="amount" inputmode="decimal" />
+          <span class="unit" id="amountUnit">mg</span>
         </div>
       </div>
       <span class="slash">/</span>
@@ -211,15 +211,31 @@ const DRUGS = [
     ],
     note: '純粋なβ刺激薬。心拍数を上げたい徐脈・トルサードに。',
   },
+  {
+    id: 'carperitide', name: 'ハンプ', nameEn: 'Carperitide (カルペリチド / hANP)',
+    // 1V = 1000μg。希釈欄はバイアル表記に合わせて mcg で入力する（defaultPrep は mg 換算）
+    amountUnit: 'mcg', gammaDigits: 4,
+    defaultPrep: { amountMg: 1, volumeMl: 50 }, typical: { min: 0.0125, max: 0.2 },
+    doseRanges: [
+      { min: 0.0125, max: 0.05, label: '低用量', effect: '本邦で多い開始量。血圧低下を避けつつ、血管拡張（前・後負荷軽減）とナトリウム利尿を期待する。' },
+      { min: 0.05, max: 0.1, label: '中用量', effect: '血管拡張・利尿作用が強まる。血圧・心拍数・尿量をみながら漸増する。' },
+      { min: 0.1, max: 0.2, label: '通常〜最大量', effect: '添付文書の通常量は0.1γ、最大0.2γ。血圧低下・徐脈・過度の利尿（脱水・電解質異常）に注意。' },
+    ],
+    note: 'ANP製剤（血管拡張＋ナトリウム利尿）で、強心・昇圧作用はない。禁忌：重篤な低血圧・心原性ショック、右室梗塞、脱水症状。1V（1000μg）を注射用水5mLで溶解後に希釈し、他剤との混注は避け単独ルートが望ましい。',
+  },
 ];
 
 // ===== 計算ロジック =====
 const concentrationMcgPerMl = (mg, ml) => (!ml ? 0 : (mg * 1000) / ml);
 const gammaToRate = (g, w, mg, ml) => { const c = concentrationMcgPerMl(mg, ml); return !c ? 0 : (g * w * 60) / c; };
 const rateToGamma = (r, w, mg, ml) => (!w ? 0 : (r * concentrationMcgPerMl(mg, ml)) / (w * 60));
+// 希釈欄の入力値 = mg × scale（mcg 入力の薬剤は 1000 倍）
+const amountScale = (d) => (d.amountUnit === 'mcg' ? 1000 : 1);
 function findDoseRange(drug, g) {
+  const last = drug.doseRanges[drug.doseRanges.length - 1];
   for (const r of drug.doseRanges) {
-    const upperOk = r.max === null ? true : g < r.max;
+    // 最終域は上限値ちょうども含める（例: ハンプ最大量 0.2γ）
+    const upperOk = r.max === null || g < r.max || (r === last && g === r.max);
     if (g >= r.min && upperOk) return r;
   }
   return null;
@@ -250,7 +266,8 @@ function renderChips() {
 
 function selectDrug(d) {
   drugId = d.id;
-  $('amountMg').value = d.defaultPrep.amountMg;
+  $('amount').value = d.defaultPrep.amountMg * amountScale(d);
+  $('amountUnit').textContent = d.amountUnit || 'mg';
   $('volumeMl').value = d.defaultPrep.volumeMl;
   $('gammaInput').value = d.typical.min;
   renderChips();
@@ -269,7 +286,7 @@ function setMode(m) {
 function update() {
   const d = drug();
   const w = parseFloat($('weight').value) || 0;
-  const mg = parseFloat($('amountMg').value) || 0;
+  const mg = (parseFloat($('amount').value) || 0) / amountScale(d);
   const ml = parseFloat($('volumeMl').value) || 0;
   const conc = concentrationMcgPerMl(mg, ml);
 
@@ -282,7 +299,7 @@ function update() {
   $('drugEn').textContent = d.nameEn;
   $('concText').textContent = `濃度 = ${fmt(conc, 1)} mcg/mL（${fmt(conc / 1000, 3)} mg/mL）`;
   $('outRate').textContent = fmt(computedRate, 2);
-  $('outGamma').textContent = fmt(computedGamma, 3);
+  $('outGamma').textContent = fmt(computedGamma, d.gammaDigits || 3);
 
   const inTypical = computedGamma >= d.typical.min && computedGamma <= d.typical.max;
   $('typicalText').innerHTML =
@@ -311,10 +328,10 @@ function update() {
 // ===== 初期化 =====
 $('modeGamma').onclick = () => setMode('gamma');
 $('modeRate').onclick = () => setMode('rate');
-['weight', 'amountMg', 'volumeMl', 'gammaInput', 'rateInput'].forEach((id) => {
+['weight', 'amount', 'volumeMl', 'gammaInput', 'rateInput'].forEach((id) => {
   $(id).addEventListener('input', update);
 });
-$('amountMg').value = DRUGS[0].defaultPrep.amountMg;
+$('amount').value = DRUGS[0].defaultPrep.amountMg;
 $('volumeMl').value = DRUGS[0].defaultPrep.volumeMl;
 renderChips();
 update();
